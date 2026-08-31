@@ -24,3 +24,212 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.travel-tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+  justify-content: space-around;
+
+  padding: 8px 4px 18px;
+
+  background: #fffaf0;
+  border-top: 1px solid #d8c6a5;
+
+  z-index: 100;
+}
+
+.travel-tab {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  padding: 6px 2px;
+
+  border: none;
+  background: transparent;
+
+  font-size: 11px;
+  color: #75624a;
+
+  cursor: pointer;
+}
+
+.travel-tab-icon {
+  font-size: 22px;
+}
+
+.travel-tab.active {
+  color: #9a6828;
+  font-weight: 700;
+}
+
+main {
+  padding-bottom: 90px;
+}
+.travel-home {
+  padding: 24px 16px 120px;
+}
+
+.travel-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.travel-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.travel-header p {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #75624a;
+}
+
+.japan-map {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.japan-map-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.region-button {
+  min-width: 120px;
+  min-height: 44px;
+
+  border: 1px solid #d8c6a5;
+  border-radius: 12px;
+
+  background: #fffaf0;
+  color: #5f513f;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.region-button.chubu {
+  margin-left: -60px;
+}
+
+.region-button.kanto {
+  margin-left: 80px;
+}
+
+.region-button.chugoku {
+  margin-left: -120px;
+}
+
+.region-button.shikoku {
+  margin-left: -60px;
+}
+
+.region-button.kyushu {
+  margin-left: -160px;
+}
+
+.map-back-button {
+  min-height: 44px;
+  padding: 0 16px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #fffaf0;
+  color: #75624a;
+
+  cursor: pointer;
+}
+
+.region-detail {
+  margin-top: 20px;
+  min-height: 300px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px dashed #d8c6a5;
+  border-radius: 20px;
+}
+.japan-overview {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.japan-overview-map {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-hotspot {
+  position: absolute;
+  padding: 5px 9px;
+
+  border: 1px solid #d8c6a5;
+  border-radius: 999px;
+
+  background: rgba(255, 250, 240, 0.9);
+  color: #5f513f;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.hotspot-hokkaido {
+  top: 8%;
+  right: 7%;
+}
+
+.hotspot-tohoku {
+  top: 33%;
+  right: 18%;
+}
+
+.hotspot-kanto {
+  top: 52%;
+  right: 15%;
+}
+
+.hotspot-chubu {
+  top: 49%;
+  right: 33%;
+}
+
+.hotspot-kinki {
+  top: 60%;
+  left: 43%;
+}
+
+.hotspot-chugoku {
+  top: 61%;
+  left: 24%;
+}
+
+.hotspot-shikoku {
+  top: 70%;
+  left: 36%;
+}
+
+.hotspot-kyushu {
+  top: 73%;
+  left: 8%;
+}

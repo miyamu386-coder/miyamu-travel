@@ -3,6 +3,7 @@
 import { useState } from "react";
 import JapanOverviewSvg from "./maps/JapanOverviewSvg";
 import KantoMapSvg from "./maps/KantoMapSvg";
+import KantoPrefectureMapSvg from "./maps/KantoPrefectureMapSvg";
 
 type RegionId =
   | "hokkaido"
@@ -51,12 +52,19 @@ export default function JapanMap() {
           ← 関東
         </button>
 
-        <h2>{selectedPrefecture}</h2>
-
         <div className="region-detail">
-          <p>
-            この都県のスポットをここに表示します。
-          </p>
+          <KantoPrefectureMapSvg
+            prefectureId={
+              selectedPrefecture as
+                | "ibaraki"
+                | "tochigi"
+                | "gunma"
+                | "saitama"
+                | "chiba"
+                | "tokyo"
+                | "kanagawa"
+            }
+          />
         </div>
       </section>
     );

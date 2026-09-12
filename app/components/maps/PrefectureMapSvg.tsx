@@ -1,4 +1,11 @@
 type PrefectureId =
+    | "hokkaido"
+    | "aomori"
+    | "iwate"
+    | "miyagi"
+    | "akita"
+    | "yamagata"
+    | "fukushima"
     | "ibaraki"
     | "tochigi"
     | "gunma"
@@ -46,6 +53,143 @@ const prefectureMaps: Record<
     PrefectureId,
     PrefectureMapData
 > = {
+    hokkaido: {
+        name: "北海道",
+        viewBox: "0 0 160 120",
+        symbol: "",
+        symbolName: "北海道",
+        symbolX: 80,
+        symbolY: 60,
+        symbolImage:
+            "/travel/symbols/hokkaido.webp",
+        shape: (
+            <path
+                d="
+                    M20 50
+                    L35 35
+                    L55 25
+                    L75 28
+                    L90 20
+                    L105 28
+                    L115 40
+                    L135 45
+                    L145 60
+                    L130 70
+                    L115 72
+                    L105 85
+                    L85 90
+                    L70 82
+                    L55 90
+                    L40 80
+                    L25 70
+                    Z
+                "
+                style={mapStyle}
+            />
+        ),
+    },
+    aomori: {
+        name: "青森県",
+        viewBox: "1400 460 340 250",
+        symbol: "",
+        symbolName: "青森",
+        symbolX: 1565,
+        symbolY: 585,
+        symbolImage:
+            "/travel/symbols/aomori.webp",
+        shape: (
+            <path
+                d="M 1664.0 514.0 L 1626.0 476.0 L 1569.0 476.0 L 1562.0 483.0 L 1562.0 513.0 L 1569.0 520.0 L 1602.0 520.0 L 1603.0 520.0 L 1603.0 521.0 L 1603.0 571.0 L 1598.0 576.0 L 1530.0 576.0 L 1529.0 576.0 L 1529.0 575.0 L 1529.0 523.0 L 1523.0 517.0 L 1478.0 517.0 L 1470.0 525.0 L 1470.0 573.0 L 1417.0 626.0 L 1417.0 647.0 L 1418.0 648.0 L 1556.0 648.0 L 1563.0 655.0 L 1563.0 690.0 L 1564.0 691.0 L 1571.0 691.0 L 1615.0 647.0 L 1717.0 647.0 L 1718.0 646.0 L 1664.0 592.0 Z"
+                style={mapStyle}
+            />
+        ),
+    },
+
+    iwate: {
+        name: "岩手県",
+        viewBox: "1540 625 200 240",
+        symbol: "",
+        symbolName: "岩手",
+        symbolX: 1640,
+        symbolY: 755,
+        symbolImage:
+            "/travel/symbols/iwate.webp",
+        shape: (
+            <path
+                d="M 1719.0 648.0 L 1718.0 647.0 L 1717.0 647.0 L 1615.0 647.0 L 1571.0 691.0 L 1564.0 691.0 L 1563.0 692.0 L 1563.0 841.0 L 1564.0 842.0 L 1718.0 842.0 L 1719.0 841.0 Z"
+                style={mapStyle}
+            />
+        ),
+    },
+
+    miyagi: {
+        name: "宮城県",
+        viewBox: "1540 820 200 200",
+        symbol: "",
+        symbolName: "宮城",
+        symbolX: 1635,
+        symbolY: 925,
+        symbolImage:
+            "/travel/symbols/miyagi.webp",
+        shape: (
+            <path
+                d="M 1719.0 843.0 L 1718.0 842.0 L 1564.0 842.0 L 1563.0 843.0 L 1563.0 860.0 L 1563.0 861.0 L 1563.0 862.0 L 1563.0 997.0 L 1564.0 998.0 L 1690.0 998.0 L 1691.0 997.0 L 1691.0 933.0 L 1719.0 905.0 Z"
+                style={mapStyle}
+            />
+        ),
+    },
+
+    akita: {
+        name: "秋田県",
+        viewBox: "1375 625 210 260",
+        symbol: "",
+        symbolName: "秋田",
+        symbolX: 1485,
+        symbolY: 760,
+        symbolImage:
+            "/travel/symbols/akita.webp",
+        shape: (
+            <path
+                d="M 1563.0 655.0 L 1556.0 648.0 L 1418.0 648.0 L 1417.0 649.0 L 1417.0 699.0 L 1416.0 700.0 L 1416.0 701.0 L 1397.0 720.0 L 1397.0 745.0 L 1417.0 765.0 L 1417.0 860.0 L 1418.0 861.0 L 1562.0 861.0 L 1563.0 860.0 L 1563.0 843.0 L 1563.0 842.0 L 1563.0 841.0 L 1563.0 692.0 L 1563.0 691.0 L 1563.0 690.0 Z"
+                style={mapStyle}
+            />
+        ),
+    },
+
+    yamagata: {
+        name: "山形県",
+        viewBox: "1395 840 190 215",
+        symbol: "",
+        symbolName: "山形",
+        symbolX: 1490,
+        symbolY: 945,
+        symbolImage:
+            "/travel/symbols/yamagata.webp",
+        shape: (
+            <path
+                d="M 1563.0 862.0 L 1562.0 861.0 L 1418.0 861.0 L 1417.0 862.0 L 1417.0 940.0 L 1418.0 941.0 L 1449.0 941.0 L 1454.0 946.0 L 1454.0 1029.0 L 1455.0 1030.0 L 1562.0 1030.0 L 1563.0 1029.0 L 1563.0 999.0 L 1563.0 998.0 L 1563.0 997.0 Z"
+                style={mapStyle}
+            />
+        ),
+    },
+
+    fukushima: {
+        name: "福島県",
+        viewBox: "1390 975 325 190",
+        symbol: "",
+        symbolName: "福島",
+        symbolX: 1555,
+        symbolY: 1085,
+        symbolImage:
+            "/travel/symbols/fukushima.webp",
+        shape: (
+            <path
+                d="M 1691.0 999.0 L 1690.0 998.0 L 1564.0 998.0 L 1563.0 999.0 L 1563.0 1029.0 L 1563.0 1030.0 L 1562.0 1030.0 L 1455.0 1030.0 L 1454.0 1030.0 L 1413.0 1071.0 L 1413.0 1140.0 L 1414.0 1141.0 L 1498.0 1141.0 L 1499.0 1140.0 L 1499.0 1129.0 L 1505.0 1123.0 L 1612.0 1123.0 L 1617.0 1128.0 L 1617.0 1141.0 L 1618.0 1142.0 L 1690.0 1142.0 L 1691.0 1141.0 Z"
+                style={mapStyle}
+            />
+        ),
+    },
+
     gunma: {
         name: "群馬県",
         viewBox: "-5 -5 75 80",
@@ -149,7 +293,7 @@ const prefectureMaps: Record<
         symbolX: 40,
         symbolY: 38,
         symbolImage:
-    "/travel/symbols/ibaraki.webp",
+            "/travel/symbols/ibaraki.webp",
         shape: (
             <polygon
                 points="
@@ -197,7 +341,7 @@ const prefectureMaps: Record<
         symbolX: 30,
         symbolY: 18,
         symbolImage:
-    "/travel/symbols/saitama.webp",
+            "/travel/symbols/saitama.webp",
         shape: (
             <polygon
                 points="
@@ -236,7 +380,7 @@ const prefectureMaps: Record<
         symbolX: 31,
         symbolY: 38,
         symbolImage:
-    "/travel/symbols/chiba.webp",
+            "/travel/symbols/chiba.webp",
         shape: (
             <polygon
                 points="
@@ -284,7 +428,7 @@ const prefectureMaps: Record<
         symbolX: 24,
         symbolY: 13,
         symbolImage:
-    "/travel/symbols/tokyo.webp",
+            "/travel/symbols/tokyo.webp",
         shape: (
             <path
                 d="
@@ -367,7 +511,7 @@ const prefectureMaps: Record<
     },
 };
 
-export default function KantoPrefectureMapSvg({
+export default function PrefectureMapSvg({
     prefectureId,
 }: Props) {
     const prefecture =

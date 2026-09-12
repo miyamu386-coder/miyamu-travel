@@ -2,8 +2,15 @@
 
 import { useState } from "react";
 import JapanOverviewSvg from "./maps/JapanOverviewSvg";
+import PrefectureMapSvg from "./maps/PrefectureMapSvg";
+import HokkaidoMapSvg from "./maps/HokkaidoMapSvg";
+import TohokuMapSvg from "./maps/TohokuMapSvg";
 import KantoMapSvg from "./maps/KantoMapSvg";
-import KantoPrefectureMapSvg from "./maps/KantoPrefectureMapSvg";
+import ChubuMapSvg from "./maps/ChubuMapSvg";
+import KinkiMapSvg from "./maps/KinkiMapSvg";
+import ChugokuMapSvg from "./maps/ChugokuMapSvg";
+import ShikokuMapSvg from "./maps/ShikokuMapSvg";
+import KyushuMapSvg from "./maps/KyushuMapSvg";
 
 type RegionId =
   | "hokkaido"
@@ -31,6 +38,17 @@ const regions: Region[] = [
   { id: "kyushu", name: "九州・沖縄" },
 ];
 
+const regionMapComponents = {
+  hokkaido: HokkaidoMapSvg,
+  tohoku: TohokuMapSvg,
+  kanto: KantoMapSvg,
+  chubu: ChubuMapSvg,
+  kinki: KinkiMapSvg,
+  chugoku: ChugokuMapSvg,
+  shikoku: ShikokuMapSvg,
+  kyushu: KyushuMapSvg,
+};
+
 export default function JapanMap() {
   const [selectedRegion, setSelectedRegion] =
     useState<RegionId | null>(null);
@@ -49,20 +67,21 @@ export default function JapanMap() {
           className="map-back-button"
           onClick={() => setSelectedPrefecture(null)}
         >
-          ← 関東
+          ← {selectedRegionData?.name}
         </button>
 
         <div className="region-detail">
-          <KantoPrefectureMapSvg
+          <PrefectureMapSvg
             prefectureId={
               selectedPrefecture as
-                | "ibaraki"
-                | "tochigi"
-                | "gunma"
-                | "saitama"
-                | "chiba"
-                | "tokyo"
-                | "kanagawa"
+              | "hokkaido"
+              | "ibaraki"
+              | "tochigi"
+              | "gunma"
+              | "saitama"
+              | "chiba"
+              | "tokyo"
+              | "kanagawa"
             }
           />
         </div>
@@ -71,6 +90,9 @@ export default function JapanMap() {
   }
 
   if (selectedRegionData) {
+    const RegionMap =
+      regionMapComponents[selectedRegionData.id];
+
     return (
       <section className="japan-map">
         <button
@@ -83,18 +105,11 @@ export default function JapanMap() {
         <h2>{selectedRegionData.name}</h2>
 
         <div className="region-detail">
-          {selectedRegion === "kanto" ? (
-            <KantoMapSvg
-              onSelectPrefecture={
-                setSelectedPrefecture
-              }
-            />
-          ) : (
-            <p>
-              {selectedRegionData.name}の地図を
-              ここに表示します。
-            </p>
-          )}
+          <RegionMap
+            onSelectPrefecture={
+              setSelectedPrefecture
+            }
+          />
         </div>
       </section>
     );

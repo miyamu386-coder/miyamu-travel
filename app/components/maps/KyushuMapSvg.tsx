@@ -4,12 +4,12 @@ type Props = {
   ) => void;
 };
 
-export default function KinkiMapSvg({
+export default function KyushuMapSvg({
   onSelectPrefecture,
 }: Props) {
   return (
     <div className="region-map">
-      <h3>近畿地方</h3>
+      <h3>九州・沖縄地方</h3>
     </div>
   );
 }

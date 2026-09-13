@@ -3,7 +3,6 @@
 import { useState } from "react";
 import JapanOverviewSvg from "./maps/JapanOverviewSvg";
 import PrefectureMapSvg from "./maps/PrefectureMapSvg";
-import HokkaidoMapSvg from "./maps/HokkaidoMapSvg";
 import TohokuMapSvg from "./maps/TohokuMapSvg";
 import KantoMapSvg from "./maps/KantoMapSvg";
 import ChubuMapSvg from "./maps/ChubuMapSvg";
@@ -21,6 +20,7 @@ type RegionId =
   | "chugoku"
   | "shikoku"
   | "kyushu";
+type RegionMapId = Exclude<RegionId, "hokkaido">;
 
 type Region = {
   id: RegionId;
@@ -39,7 +39,6 @@ const regions: Region[] = [
 ];
 
 const regionMapComponents = {
-  hokkaido: HokkaidoMapSvg,
   tohoku: TohokuMapSvg,
   kanto: KantoMapSvg,
   chubu: ChubuMapSvg,
@@ -59,6 +58,23 @@ export default function JapanMap() {
   const selectedRegionData = regions.find(
     (region) => region.id === selectedRegion
   );
+
+  if (selectedRegion === "hokkaido" && !selectedPrefecture) {
+  return (
+    <section className="japan-map">
+      <button
+        className="map-back-button"
+        onClick={() => setSelectedRegion(null)}
+      >
+        ← 日本全国
+      </button>
+
+      <div className="region-detail">
+        <PrefectureMapSvg prefectureId="hokkaido" />
+      </div>
+    </section>
+  );
+}
 
   if (selectedPrefecture) {
     return (
@@ -89,9 +105,9 @@ export default function JapanMap() {
     );
   }
 
-  if (selectedRegionData) {
-    const RegionMap =
-      regionMapComponents[selectedRegionData.id];
+if (selectedRegionData && selectedRegion !== "hokkaido") {
+  const RegionMap =
+    regionMapComponents[selectedRegion as RegionMapId];
 
     return (
       <section className="japan-map">

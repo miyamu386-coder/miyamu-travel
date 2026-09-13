@@ -60,21 +60,21 @@ export default function JapanMap() {
   );
 
   if (selectedRegion === "hokkaido" && !selectedPrefecture) {
-  return (
-    <section className="japan-map">
-      <button
-        className="map-back-button"
-        onClick={() => setSelectedRegion(null)}
-      >
-        ← 日本全国
-      </button>
+    return (
+      <section className="japan-map">
+        <button
+          className="map-back-button"
+          onClick={() => setSelectedRegion(null)}
+        >
+          ← 日本全国
+        </button>
 
-      <div className="region-detail">
-        <PrefectureMapSvg prefectureId="hokkaido" />
-      </div>
-    </section>
-  );
-}
+        <div className="region-detail">
+          <PrefectureMapSvg prefectureId="hokkaido" />
+        </div>
+      </section>
+    );
+  }
 
   if (selectedPrefecture) {
     return (
@@ -89,25 +89,65 @@ export default function JapanMap() {
         <div className="region-detail">
           <PrefectureMapSvg
             prefectureId={
-              selectedPrefecture as
-              | "hokkaido"
-              | "ibaraki"
-              | "tochigi"
-              | "gunma"
-              | "saitama"
-              | "chiba"
-              | "tokyo"
-              | "kanagawa"
-            }
+  selectedPrefecture as
+  | "hokkaido"
+  | "aomori"
+  | "iwate"
+  | "miyagi"
+  | "akita"
+  | "yamagata"
+  | "fukushima"
+  | "ibaraki"
+  | "tochigi"
+  | "gunma"
+  | "saitama"
+  | "chiba"
+  | "tokyo"
+  | "kanagawa"
+  | "niigata"
+  | "toyama"
+  | "ishikawa"
+  | "fukui"
+  | "yamanashi"
+  | "nagano"
+  | "gifu"
+  | "shizuoka"
+  | "aichi"
+  | "mie"
+  | "shiga"
+  | "kyoto"
+  | "osaka"
+  | "hyogo"
+  | "nara"
+  | "wakayama"
+  | "tottori"
+  | "shimane"
+  | "okayama"
+  | "hiroshima"
+  | "yamaguchi"
+  | "tokushima"
+  | "kagawa"
+  | "ehime"
+  | "kochi"
+  | "fukuoka"
+  | "saga"
+  | "nagasaki"
+  | "kumamoto"
+  | "oita"
+  | "miyazaki"
+  | "kagoshima"
+  | "okinawa"
+}
+
           />
         </div>
       </section>
     );
   }
 
-if (selectedRegionData && selectedRegion !== "hokkaido") {
-  const RegionMap =
-    regionMapComponents[selectedRegion as RegionMapId];
+  if (selectedRegionData && selectedRegion !== "hokkaido") {
+    const RegionMap =
+      regionMapComponents[selectedRegion as RegionMapId];
 
     return (
       <section className="japan-map">

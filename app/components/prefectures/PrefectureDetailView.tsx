@@ -19,12 +19,6 @@ export default function PrefectureDetailView({
     spots,
     onAddSpot,
 }: Props) {
-    console.log("component types", {
-        PrefectureMapSvg:
-            typeof PrefectureMapSvg,
-        SpotList:
-            typeof SpotList,
-    });
 
     return (
         <section className="prefecture-detail">

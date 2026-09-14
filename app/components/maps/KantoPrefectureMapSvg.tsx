@@ -1,4 +1,4 @@
-type PrefectureId =
+export type PrefectureId =
     | "ibaraki"
     | "tochigi"
     | "gunma"
@@ -149,7 +149,7 @@ const prefectureMaps: Record<
         symbolX: 40,
         symbolY: 38,
         symbolImage:
-    "/travel/symbols/ibaraki.webp",
+            "/travel/symbols/ibaraki.webp",
         shape: (
             <polygon
                 points="
@@ -197,7 +197,7 @@ const prefectureMaps: Record<
         symbolX: 30,
         symbolY: 18,
         symbolImage:
-    "/travel/symbols/saitama.webp",
+            "/travel/symbols/saitama.webp",
         shape: (
             <polygon
                 points="
@@ -236,7 +236,7 @@ const prefectureMaps: Record<
         symbolX: 31,
         symbolY: 38,
         symbolImage:
-    "/travel/symbols/chiba.webp",
+            "/travel/symbols/chiba.webp",
         shape: (
             <polygon
                 points="
@@ -284,7 +284,7 @@ const prefectureMaps: Record<
         symbolX: 24,
         symbolY: 13,
         symbolImage:
-    "/travel/symbols/tokyo.webp",
+            "/travel/symbols/tokyo.webp",
         shape: (
             <path
                 d="

@@ -10,6 +10,12 @@ import KinkiMapSvg from "./maps/KinkiMapSvg";
 import ChugokuMapSvg from "./maps/ChugokuMapSvg";
 import ShikokuMapSvg from "./maps/ShikokuMapSvg";
 import KyushuMapSvg from "./maps/KyushuMapSvg";
+import PrefectureDetailView from "./prefectures/PrefectureDetailView";
+
+import type {
+  PrefectureId,
+  TravelSpot,
+} from "../types/travel";
 
 type RegionId =
   | "hokkaido"
@@ -53,7 +59,9 @@ export default function JapanMap() {
     useState<RegionId | null>(null);
 
   const [selectedPrefecture, setSelectedPrefecture] =
-    useState<string | null>(null);
+    useState<PrefectureId | null>(null);
+
+  const [spots] = useState<TravelSpot[]>([]);
 
   const selectedRegionData = regions.find(
     (region) => region.id === selectedRegion
@@ -81,64 +89,22 @@ export default function JapanMap() {
       <section className="japan-map">
         <button
           className="map-back-button"
-          onClick={() => setSelectedPrefecture(null)}
+          onClick={() =>
+            setSelectedPrefecture(null)
+          }
         >
           ← {selectedRegionData?.name}
         </button>
 
         <div className="region-detail">
-          <PrefectureMapSvg
-            prefectureId={
-  selectedPrefecture as
-  | "hokkaido"
-  | "aomori"
-  | "iwate"
-  | "miyagi"
-  | "akita"
-  | "yamagata"
-  | "fukushima"
-  | "ibaraki"
-  | "tochigi"
-  | "gunma"
-  | "saitama"
-  | "chiba"
-  | "tokyo"
-  | "kanagawa"
-  | "niigata"
-  | "toyama"
-  | "ishikawa"
-  | "fukui"
-  | "yamanashi"
-  | "nagano"
-  | "gifu"
-  | "shizuoka"
-  | "aichi"
-  | "mie"
-  | "shiga"
-  | "kyoto"
-  | "osaka"
-  | "hyogo"
-  | "nara"
-  | "wakayama"
-  | "tottori"
-  | "shimane"
-  | "okayama"
-  | "hiroshima"
-  | "yamaguchi"
-  | "tokushima"
-  | "kagawa"
-  | "ehime"
-  | "kochi"
-  | "fukuoka"
-  | "saga"
-  | "nagasaki"
-  | "kumamoto"
-  | "oita"
-  | "miyazaki"
-  | "kagoshima"
-  | "okinawa"
-}
-
+          <PrefectureDetailView
+            prefectureId={selectedPrefecture}
+            spots={spots}
+            onAddSpot={() => {
+              console.log(
+                `${selectedPrefecture}へスポット追加`
+              );
+            }}
           />
         </div>
       </section>
@@ -162,9 +128,11 @@ export default function JapanMap() {
 
         <div className="region-detail">
           <RegionMap
-            onSelectPrefecture={
-              setSelectedPrefecture
-            }
+            onSelectPrefecture={(prefectureId) => {
+              setSelectedPrefecture(
+                prefectureId as PrefectureId
+              );
+            }}
           />
         </div>
       </section>

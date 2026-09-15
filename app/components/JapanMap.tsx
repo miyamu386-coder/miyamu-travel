@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import JapanOverviewSvg from "./maps/JapanOverviewSvg";
-import PrefectureMapSvg from "./maps/PrefectureMapSvg";
 import TohokuMapSvg from "./maps/TohokuMapSvg";
 import KantoMapSvg from "./maps/KantoMapSvg";
 import ChubuMapSvg from "./maps/ChubuMapSvg";
@@ -107,23 +106,6 @@ useEffect(() => {
   const selectedRegionData = regions.find(
     (region) => region.id === selectedRegion
   );
-
-  if (selectedRegion === "hokkaido" && !selectedPrefecture) {
-    return (
-      <section className="japan-map">
-        <button
-          className="map-back-button"
-          onClick={() => setSelectedRegion(null)}
-        >
-          ← 日本全国
-        </button>
-
-        <div className="region-detail">
-          <PrefectureMapSvg prefectureId="hokkaido" />
-        </div>
-      </section>
-    );
-  }
 
   if (selectedPrefecture) {
     return (
@@ -238,8 +220,14 @@ useEffect(() => {
   return (
     <section className="japan-map">
       <JapanOverviewSvg
-        onSelectRegion={setSelectedRegion}
-      />
+  onSelectRegion={(regionId) => {
+    setSelectedRegion(regionId);
+
+    if (regionId === "hokkaido") {
+      setSelectedPrefecture("hokkaido");
+    }
+  }}
+/>
     </section>
   );
 }

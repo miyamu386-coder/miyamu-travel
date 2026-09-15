@@ -5,11 +5,15 @@ import type { VisitRecord } from "../../types/travel";
 type Props = {
     prefectureId: string;
     visits: VisitRecord[];
+    onEditVisit: (visit: VisitRecord) => void;
+    onDeleteVisit: (visitId: string) => void;
 };
 
 export function VisitRecordList({
     prefectureId,
     visits,
+    onEditVisit,
+    onDeleteVisit,
 }: Props) {
     const prefectureVisits = visits.filter(
         (visit) =>
@@ -63,6 +67,22 @@ export function VisitRecordList({
                             {visit.memo && (
                                 <p>{visit.memo}</p>
                             )}
+
+                            <div className="spot-list-item-actions">
+                                <button
+                                    type="button"
+                                    onClick={() => onEditVisit(visit)}
+                                >
+                                    編集
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => onDeleteVisit(visit.id)}
+                                >
+                                    削除
+                                </button>
+                            </div>
                         </li>
                     ))}
                 </ul>

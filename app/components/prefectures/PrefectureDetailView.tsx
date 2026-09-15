@@ -12,12 +12,16 @@ type Props = {
     prefectureId: PrefectureId;
     visits: VisitRecord[];
     onAddVisit: () => void;
+    onEditVisit: (visit: VisitRecord) => void;
+    onDeleteVisit: (visitId: string) => void;
 };
 
 export default function PrefectureDetailView({
     prefectureId,
     visits,
     onAddVisit,
+    onEditVisit,
+    onDeleteVisit,
 }: Props) {
     return (
         <section className="prefecture-detail">
@@ -25,10 +29,12 @@ export default function PrefectureDetailView({
                 prefectureId={prefectureId}
             />
 
-            <VisitRecordList
-                prefectureId={prefectureId}
-                visits={visits}
-            />
+           <VisitRecordList
+    prefectureId={prefectureId}
+    visits={visits}
+    onEditVisit={onEditVisit}
+    onDeleteVisit={onDeleteVisit}
+/>
 
             <button
                 type="button"

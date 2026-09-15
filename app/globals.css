@@ -305,3 +305,146 @@ main {
       rotateY(0deg);
   }
 }
+/* ========================================
+   Travel - 旅の記録
+======================================== */
+
+.spot-list {
+    width: min(92%, 720px);
+    margin: 28px auto 16px;
+    padding: 22px;
+    border: 1px solid rgba(120, 90, 55, 0.18);
+    border-radius: 22px;
+    background: rgba(255, 252, 246, 0.92);
+    box-shadow: 0 6px 20px rgba(70, 50, 30, 0.08);
+}
+
+.spot-list-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.spot-list-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.spot-list-header p {
+    margin: 5px 0 0;
+    font-size: 0.85rem;
+    opacity: 0.58;
+}
+
+.spot-list-count {
+    flex-shrink: 0;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(120, 90, 55, 0.09);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.spot-list-empty {
+    padding: 26px 16px 20px;
+    text-align: center;
+}
+
+.spot-list-empty-paw {
+    margin-bottom: 12px;
+    font-size: 2rem;
+    line-height: 1;
+    opacity: 0.65;
+}
+
+.spot-list-empty-title {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.spot-list-empty-description {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    opacity: 0.6;
+}
+
+
+/* 訪問記録一覧 */
+
+.spot-list-items {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.spot-list-item {
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(120, 90, 55, 0.12);
+}
+
+.spot-list-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.spot-list-item h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.spot-list-item time {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+
+.spot-list-item p {
+    margin: 9px 0 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+
+/* 訪問記録追加ボタン */
+
+.prefecture-add-button {
+    display: block;
+    width: min(86%, 360px);
+    margin: 18px auto 30px;
+    padding: 13px 20px;
+
+    border: 1px solid rgba(120, 90, 55, 0.24);
+    border-radius: 999px;
+
+    background: rgba(255, 252, 246, 0.95);
+    box-shadow: 0 4px 14px rgba(70, 50, 30, 0.07);
+
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.prefecture-add-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(70, 50, 30, 0.11);
+}
+
+.prefecture-add-button:active {
+    transform: translateY(1px);
+}

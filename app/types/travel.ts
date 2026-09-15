@@ -53,7 +53,7 @@ export type Prefecture = {
   region: string;
 };
 
-export type TravelSpot = {
+export type VisitRecord = {
   id: string;
   prefectureId: PrefectureId;
   name: string;

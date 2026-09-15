@@ -14,7 +14,7 @@ import PrefectureDetailView from "./prefectures/PrefectureDetailView";
 
 import type {
   PrefectureId,
-  TravelSpot,
+  VisitRecord,
 } from "../types/travel";
 
 type RegionId =
@@ -61,7 +61,7 @@ export default function JapanMap() {
   const [selectedPrefecture, setSelectedPrefecture] =
     useState<PrefectureId | null>(null);
 
-  const [spots] = useState<TravelSpot[]>([]);
+  const [visits] = useState<VisitRecord[]>([]);
 
   const selectedRegionData = regions.find(
     (region) => region.id === selectedRegion
@@ -99,10 +99,10 @@ export default function JapanMap() {
         <div className="region-detail">
           <PrefectureDetailView
             prefectureId={selectedPrefecture}
-            spots={spots}
-            onAddSpot={() => {
+            visits={visits}
+            onAddVisit={() => {
               console.log(
-                `${selectedPrefecture}へスポット追加`
+                `${selectedPrefecture}へ訪問記録追加`
               );
             }}
           />

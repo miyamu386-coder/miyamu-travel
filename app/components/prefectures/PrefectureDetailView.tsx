@@ -1,42 +1,42 @@
 "use client";
 
 import PrefectureMapSvg from "../maps/PrefectureMapSvg";
-import { SpotList } from "../spots/SpotList";
+import { VisitRecordList } from "../visits/VisitRecordList";
 
 import type {
     PrefectureId,
-    TravelSpot,
+    VisitRecord,
 } from "../../types/travel";
 
 type Props = {
     prefectureId: PrefectureId;
-    spots: TravelSpot[];
-    onAddSpot: () => void;
+    visits: VisitRecord[];
+    onAddVisit: () => void;
 };
 
 export default function PrefectureDetailView({
     prefectureId,
-    spots,
-    onAddSpot,
+    visits,
+    onAddVisit,
 }: Props) {
-
     return (
         <section className="prefecture-detail">
             <PrefectureMapSvg
                 prefectureId={prefectureId}
             />
 
+            <VisitRecordList
+                prefectureId={prefectureId}
+                visits={visits}
+            />
+
             <button
                 type="button"
                 className="prefecture-add-button"
-                onClick={onAddSpot}
+                onClick={onAddVisit}
             >
                 ＋ 訪問記録を追加
             </button>
-            <SpotList
-                prefectureId={prefectureId}
-                spots={spots}
-            />
         </section>
     );
 }

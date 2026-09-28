@@ -61,3 +61,29 @@ export type VisitRecord = {
   memo: string;
   photoUrl?: string;
 };
+export type GoshuinPlaceType =
+  | "shrine"
+  | "temple";
+
+export type GoshuinRecord = {
+  id: string;
+
+  // 寺社情報
+  prefectureId: PrefectureId;
+  placeName: string;
+  placeType: GoshuinPlaceType;
+
+  // 御朱印
+  receivedAt: string;
+  imageUrl: string;
+
+  // 記録
+  memo: string;
+  isFavorite: boolean;
+
+  // モフ太郎の肉球スタンプ
+  pawStamp: boolean;
+
+  createdAt: string;
+  updatedAt: string;
+};

@@ -29,12 +29,12 @@ export default function PrefectureDetailView({
                 prefectureId={prefectureId}
             />
 
-           <VisitRecordList
-    prefectureId={prefectureId}
-    visits={visits}
-    onEditVisit={onEditVisit}
-    onDeleteVisit={onDeleteVisit}
-/>
+            <VisitRecordList
+                prefectureId={prefectureId}
+                visits={visits}
+                onEditVisit={onEditVisit}
+                onDeleteVisit={onDeleteVisit}
+            />
 
             <button
                 type="button"

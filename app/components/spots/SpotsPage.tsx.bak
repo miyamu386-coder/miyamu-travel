@@ -1,0 +1,86 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import type { VisitRecord } from "../../types/travel";
+
+export default function SpotsPage() {
+  const [visits, setVisits] = useState<VisitRecord[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(
+        "miyamu-travel-visits"
+      );
+
+      if (saved) {
+        const parsed: unknown = JSON.parse(saved);
+
+        if (Array.isArray(parsed)) {
+          setVisits(parsed as VisitRecord[]);
+        }
+      }
+    } catch (error) {
+      console.error(
+        "訪問記録の読み込みに失敗しました",
+        error
+      );
+    } finally {
+      setLoaded(true);
+    }
+  }, []);
+
+  const sortedVisits = [...visits].sort((a, b) =>
+    b.visitedAt.localeCompare(a.visitedAt)
+  );
+
+  return (
+    <section className="spot-list">
+      <div className="spot-list-header">
+        <div>
+          <h2>📍 スポット</h2>
+          <p>モフ太郎と旅した場所の記録</p>
+        </div>
+
+        <span className="spot-list-count">
+          {visits.length}件
+        </span>
+      </div>
+
+      {!loaded ? (
+        <p>読み込み中...</p>
+      ) : sortedVisits.length === 0 ? (
+        <div className="spot-list-empty">
+          <div className="spot-list-empty-paw">
+            🐾
+          </div>
+
+          <p className="spot-list-empty-title">
+            まだ訪問記録がありません
+          </p>
+
+          <p>
+            ホームの日本地図から
+            訪問した場所を登録してみよう！
+          </p>
+        </div>
+      ) : (
+        <ul className="spot-list-items">
+          {sortedVisits.map((visit) => (
+            <li
+              key={visit.id}
+              className="spot-list-item"
+            >
+              <div className="spot-list-item-header">
+                <h4>{visit.name}</h4>
+                <time>{visit.visitedAt}</time>
+              </div>
+
+              {visit.memo && <p>{visit.memo}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}

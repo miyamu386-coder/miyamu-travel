@@ -5,6 +5,9 @@ import {
   useState,
 } from "react";
 import TravelHome from "./components/TravelHome";
+import TravelDiaryPage from "./components/diary/TravelDiaryPage";
+import PhotoAlbum from "./components/photos/PhotoAlbum";
+import SpotsPage from "./components/spots/SpotsPage";
 import TravelTabBar from "./components/TravelTabBar";
 import GoshuinRecordForm from "./components/goshuin/GoshuinRecordForm";
 import GoshuinAlbum from "./components/goshuin/GoshuinAlbum";
@@ -40,6 +43,9 @@ export default function Home() {
   return (
     <main>
       {tab === "home" && <TravelHome />}
+      {tab === "diary" && <TravelDiaryPage />}
+      {tab === "album" && <PhotoAlbum />}
+      {tab === "spots" && <SpotsPage />}
       {tab === "goshuin" && (
         isAddingGoshuin ? (
           <GoshuinRecordForm

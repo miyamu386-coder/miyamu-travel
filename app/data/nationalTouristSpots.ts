@@ -1,3 +1,4 @@
+import { expandedTouristSpots } from "./expandedTouristSpots";
 import type { TouristSpot } from "./touristSpots";
 
 export const nationalTouristSpots: TouristSpot[] = [
@@ -57,4 +58,5 @@ export const nationalTouristSpots: TouristSpot[] = [
   { id: "takachiho", prefectureId: "miyazaki", name: "高千穂峡", area: "高千穂町", category: "自然", description: "柱状節理の断崖が続く渓谷。" },
   { id: "sakurajima", prefectureId: "kagoshima", name: "桜島", area: "鹿児島市", category: "自然", description: "鹿児島湾に位置する活火山。" },
   { id: "shurijo", prefectureId: "okinawa", name: "首里城公園", area: "那覇市", category: "歴史・観光", description: "琉球王国の歴史に触れられる公園。" },
+  ...expandedTouristSpots,
 ];

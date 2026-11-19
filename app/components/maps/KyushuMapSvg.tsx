@@ -1,4 +1,5 @@
 type Props = {
+  visitedIds?: ReadonlySet<string>;
   onSelectPrefecture: (
     prefectureId: string
   ) => void;
@@ -65,6 +66,7 @@ const prefectures = [
 
 export default function KyushuMapSvg({
   onSelectPrefecture,
+  visitedIds,
 }: Props) {
   return (
     <div className="region-map">
@@ -86,7 +88,7 @@ export default function KyushuMapSvg({
           >
             <path
               d={prefecture.d}
-              fill="#e8e8e8"
+              fill={visitedIds?.has(prefecture.id) ? "#83d6a0" : "#e8e8e8"}
               stroke="#333"
               strokeWidth="2"
               strokeLinejoin="round"

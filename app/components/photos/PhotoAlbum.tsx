@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { playTokotokoMofu } from "../TokotokoMofu";
 import {
   Camera,
   CameraResultType,
@@ -134,9 +135,12 @@ export default function PhotoAlbum() {
           console.error(cleanupError);
         }
       }
+      return;
     } finally {
       setBusy(false);
     }
+
+    playTokotokoMofu({ kind: "photo", previewSrc: imageData });
   }
 
   async function removePhoto(photo: TravelPhoto) {

@@ -2,9 +2,12 @@
 
 import {
     useEffect,
+    useRef,
     useState,
     type FormEvent,
 } from "react";
+
+import { getPhotoPrefecture } from "../../lib/photoPrefecture";
 
 import type {
     GoshuinPlaceType,
@@ -26,7 +29,7 @@ import {
 type Props = {
     prefectures: Prefecture[];
     initialPrefectureId?: PrefectureId;
-    onSave: (record: GoshuinRecord) => void;
+    onSave: (record: GoshuinRecord, previewSrc: string) => Promise<void>;
     onCancel?: () => void;
 };
 
@@ -37,11 +40,9 @@ export default function GoshuinRecordForm({
     onCancel,
 }: Props) {
     const [prefectureId, setPrefectureId] =
-        useState<PrefectureId>(
-            initialPrefectureId ??
-            prefectures[0]?.id ??
-            "hokkaido",
-        );
+        useState<PrefectureId | "">(initialPrefectureId ?? "");
+    const photoRequest = useRef(0);
+    const prefectureRevision = useRef(0);
 
     const [placeName, setPlaceName] =
         useState("");
@@ -61,6 +62,10 @@ export default function GoshuinRecordForm({
     const [pawStamp, setPawStamp] =
         useState(true);
 
+    const saving = useRef(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveError, setSaveError] = useState("");
+
     const [imageUrl, setImageUrl] =
         useState("");
 
@@ -70,21 +75,17 @@ export default function GoshuinRecordForm({
         }
     }, [initialPrefectureId]);
 
-    const handleTakePhoto = async () => {
-        const image =
-            await takeGoshuinPhoto();
+    const selectPhoto = async (takenNow: boolean) => {
+        const request = ++photoRequest.current;
+        const revision = prefectureRevision.current;
+        const image = await (takenNow ? takeGoshuinPhoto() : pickGoshuinPhoto());
+        if (!image || request !== photoRequest.current) return;
 
-        if (image) {
-            setImageUrl(image);
-        }
-    };
-
-    const handlePickPhoto = async () => {
-        const image =
-            await pickGoshuinPhoto();
-
-        if (image) {
-            setImageUrl(image);
+        setImageUrl(image);
+        const detected = await getPhotoPrefecture(image, takenNow);
+        if (detected && request === photoRequest.current &&
+            revision === prefectureRevision.current) {
+            setPrefectureId(detected);
         }
     };
 
@@ -92,11 +93,17 @@ export default function GoshuinRecordForm({
         event: FormEvent<HTMLFormElement>,
     ) => {
         event.preventDefault();
+        if (saving.current) return;
 
         if (!placeName.trim()) {
             window.alert(
                 "寺社名を入力してください。",
             );
+            return;
+        }
+
+        if (!prefectureId) {
+            window.alert("都道府県を選択してください。");
             return;
         }
 
@@ -114,38 +121,50 @@ export default function GoshuinRecordForm({
             return;
         }
 
-        const savedImagePath =
-            await saveGoshuinImage(
-                imageUrl,
-            );
+        saving.current = true;
+        setIsSaving(true);
+        setSaveError("");
 
-        const now =
-            new Date().toISOString();
+        try {
+            const savedImagePath =
+                await saveGoshuinImage(
+                    imageUrl,
+                );
 
-        const record: GoshuinRecord = {
-            id: crypto.randomUUID(),
-            prefectureId,
-            placeName:
-                placeName.trim(),
-            placeType,
-            receivedAt,
-            imageUrl: savedImagePath,
-            memo: memo.trim(),
-            isFavorite,
-            pawStamp,
-            createdAt: now,
-            updatedAt: now,
-        };
+            const now =
+                new Date().toISOString();
 
-        onSave(record);
+            const record: GoshuinRecord = {
+                id: crypto.randomUUID(),
+                prefectureId,
+                placeName:
+                    placeName.trim(),
+                placeType,
+                receivedAt,
+                imageUrl: savedImagePath,
+                memo: memo.trim(),
+                isFavorite,
+                pawStamp,
+                createdAt: now,
+                updatedAt: now,
+            };
 
-        setPlaceName("");
-        setPlaceType("shrine");
-        setReceivedAt("");
-        setMemo("");
-        setIsFavorite(false);
-        setPawStamp(true);
-        setImageUrl("");
+            await onSave(record, imageUrl);
+
+            setPlaceName("");
+            setPlaceType("shrine");
+            setReceivedAt("");
+            setMemo("");
+            setIsFavorite(false);
+            setPawStamp(true);
+            setImageUrl("");
+        } catch (error) {
+            console.error("御朱印の保存失敗", error);
+            setSaveError("御朱印を保存できませんでした。");
+        } finally {
+            saving.current = false;
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -183,7 +202,7 @@ export default function GoshuinRecordForm({
                 <div style={styles.photoButtons}>
                     <button
                         type="button"
-                        onClick={handleTakePhoto}
+                        onClick={() => void selectPhoto(true)}
                         style={styles.photoButton}
                     >
                         📷 撮影する
@@ -191,7 +210,7 @@ export default function GoshuinRecordForm({
 
                     <button
                         type="button"
-                        onClick={handlePickPhoto}
+                        onClick={() => void selectPhoto(false)}
                         style={styles.photoButton}
                     >
                         🖼️ 写真から選ぶ
@@ -274,14 +293,14 @@ export default function GoshuinRecordForm({
 
             <select
                 value={prefectureId}
-                onChange={(event) =>
-                    setPrefectureId(
-                        event.target
-                            .value as PrefectureId,
-                    )
-                }
+                required
+                onChange={(event) => {
+                    prefectureRevision.current++;
+                    setPrefectureId(event.target.value as PrefectureId | "");
+                }}
                 style={styles.input}
             >
+                <option value="">都道府県を選択</option>
                 {prefectures.map(
                     (prefecture) => (
                         <option
@@ -360,10 +379,13 @@ export default function GoshuinRecordForm({
 
             <button
                 type="submit"
+                disabled={isSaving}
                 style={styles.saveButton}
             >
-                保存する
+                {isSaving ? "保存中…" : "保存する"}
             </button>
+
+            {saveError && <p role="alert">{saveError}</p>}
 
             {onCancel && (
                 <button

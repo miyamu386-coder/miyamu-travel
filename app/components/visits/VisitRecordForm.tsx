@@ -10,6 +10,7 @@ import type {
 type Props = {
   prefectureId: PrefectureId;
   initialVisit?: VisitRecord | null;
+  initialName?: string;
   onSave: (visit: VisitRecord) => void;
   onCancel: () => void;
 };
@@ -17,11 +18,12 @@ type Props = {
 export function VisitRecordForm({
   prefectureId,
   initialVisit = null,
+  initialName = "",
   onSave,
   onCancel,
 }: Props) {
   const [name, setName] = useState(
-    initialVisit?.name ?? ""
+    initialVisit?.name ?? initialName
   );
 
   const [visitedAt, setVisitedAt] = useState(

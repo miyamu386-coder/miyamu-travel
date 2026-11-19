@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { touristSpots } from "../data/touristSpots";
+import { nationalTouristSpots } from "../data/nationalTouristSpots";
 import JapanOverviewSvg from "./maps/JapanOverviewSvg";
 import TohokuMapSvg from "./maps/TohokuMapSvg";
 import KantoMapSvg from "./maps/KantoMapSvg";
@@ -53,6 +55,22 @@ const regionMapComponents = {
   shikoku: ShikokuMapSvg,
   kyushu: KyushuMapSvg,
 };
+
+const hokkaidoSpotNames = new Set(
+  [...touristSpots, ...nationalTouristSpots]
+    .filter((spot) => spot.prefectureId === "hokkaido")
+    .map((spot) => spot.name.trim())
+);
+
+function hasVisitedEveryHokkaidoSpot(visits: VisitRecord[]) {
+  const visitedNames = new Set(
+    visits
+      .filter((visit) => visit.prefectureId === "hokkaido")
+      .map((visit) => visit.name.trim())
+  );
+  return hokkaidoSpotNames.size > 0 &&
+    Array.from(hokkaidoSpotNames).every((name) => visitedNames.has(name));
+}
 
 export default function JapanMap() {
   const [selectedRegion, setSelectedRegion] =
@@ -107,6 +125,8 @@ useEffect(() => {
     (region) => region.id === selectedRegion
   );
 
+  const visitedIds = new Set(visits.map((visit) => visit.prefectureId));
+
   if (selectedPrefecture) {
     return (
       <section className="japan-map">
@@ -119,7 +139,14 @@ useEffect(() => {
           ← {selectedRegionData?.name}
         </button>
 
-        <div className="region-detail">
+        <div
+          className="region-detail"
+          style={{
+            "--prefecture-fill": visits.some(
+              (visit) => visit.prefectureId === selectedPrefecture
+            ) ? "#83d6a0" : "#e8e8e8",
+          } as React.CSSProperties}
+        >
           <PrefectureDetailView
             prefectureId={selectedPrefecture}
             visits={visits}
@@ -206,6 +233,7 @@ useEffect(() => {
 
         <div className="region-detail">
           <RegionMap
+            visitedIds={visitedIds}
             onSelectPrefecture={(prefectureId) => {
               setSelectedPrefecture(
                 prefectureId as PrefectureId
@@ -220,14 +248,16 @@ useEffect(() => {
   return (
     <section className="japan-map">
       <JapanOverviewSvg
-  onSelectRegion={(regionId) => {
-    setSelectedRegion(regionId);
+        hokkaidoComplete={hasVisitedEveryHokkaidoSpot(visits)}
+        visitedIds={visitedIds}
+        onSelectRegion={(regionId) => {
+          setSelectedRegion(regionId);
 
-    if (regionId === "hokkaido") {
-      setSelectedPrefecture("hokkaido");
-    }
-  }}
-/>
+          if (regionId === "hokkaido") {
+            setSelectedPrefecture("hokkaido");
+          }
+        }}
+      />
     </section>
   );
 }

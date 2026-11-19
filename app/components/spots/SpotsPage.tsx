@@ -161,6 +161,24 @@ export default function SpotsPage() {
           <TouristSpotList
             key={selectedPrefecture}
             prefectureId={selectedPrefecture}
+            onRecordVisit={(visit) => {
+              try {
+                const key = "miyamu-travel-visits";
+                const saved = localStorage.getItem(key);
+                const existing = saved === null ? [] : JSON.parse(saved);
+                if (!Array.isArray(existing)) {
+                  throw new Error("訪問記録の形式が正しくありません");
+                }
+                const nextVisits: VisitRecord[] = [...existing, visit];
+                localStorage.setItem(key, JSON.stringify(nextVisits));
+                setVisits(nextVisits);
+                return true;
+              } catch (error) {
+                console.error("訪問記録の保存失敗", error);
+                window.alert("訪問記録を保存できませんでした。");
+                return false;
+              }
+            }}
           />
         </>
       ) : selectedRegion ? (

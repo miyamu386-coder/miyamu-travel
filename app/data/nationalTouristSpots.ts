@@ -2,6 +2,16 @@ import type { TouristSpot } from "./touristSpots";
 
 export const nationalTouristSpots: TouristSpot[] = [
   { id: "sapporo-clock", prefectureId: "hokkaido", name: "札幌市時計台", area: "札幌市", category: "歴史・観光", description: "札幌の歴史を伝える時計台。" },
+  { id: "otaru-canal", prefectureId: "hokkaido", name: "小樽運河", area: "小樽市", category: "歴史・景観", description: "石造倉庫が並ぶ運河沿いを散策できる。" },
+  { id: "noboribetsu-jigokudani", prefectureId: "hokkaido", name: "登別地獄谷", area: "登別市", category: "自然・温泉", description: "湯けむりが立ちのぼる登別温泉の景勝地。" },
+  { id: "goryokaku-park", prefectureId: "hokkaido", name: "五稜郭公園", area: "函館市", category: "歴史・公園", description: "星形の城郭跡を散策できる公園。" },
+  { id: "mount-hakodate", prefectureId: "hokkaido", name: "函館山", area: "函館市", category: "自然・展望", description: "山頂から函館の街並みと両側の海を見渡せる。" },
+  { id: "asahiyama-zoo", prefectureId: "hokkaido", name: "旭山動物園", area: "旭川市", category: "動物園", description: "動物の行動や暮らしぶりを観察できる動物園。" },
+  { id: "shirogane-blue-pond", prefectureId: "hokkaido", name: "白金青い池", area: "美瑛町", category: "自然・景観", description: "青い水面と立ち枯れた木々が印象的な池。" },
+  { id: "cape-soya", prefectureId: "hokkaido", name: "宗谷岬", area: "稚内市", category: "自然・展望", description: "北海道本島の最北端から宗谷海峡を望む岬。" },
+  { id: "shiretoko-five-lakes", prefectureId: "hokkaido", name: "知床五湖", area: "斜里町", category: "自然・散策", description: "知床の森に点在する５つの湖。" },
+  { id: "lake-mashu", prefectureId: "hokkaido", name: "摩周湖", area: "弟子屈町", category: "自然・展望", description: "カルデラにたたえられた湖を展望台から見渡せる。" },
+  { id: "kushiro-wetland", prefectureId: "hokkaido", name: "釧路湿原国立公園", area: "釧路市・周辺町村", category: "自然・国立公園", description: "蛇行する釧路川と広大な湿原が広がる。" },
   { id: "hirosaki-castle", prefectureId: "aomori", name: "弘前城", area: "弘前市", category: "城・歴史", description: "弘前公園内にある歴史的な城。" },
   { id: "chusonji", prefectureId: "iwate", name: "中尊寺", area: "平泉町", category: "寺院", description: "金色堂で知られる平泉の寺院。" },
   { id: "matsushima", prefectureId: "miyagi", name: "松島", area: "松島町周辺", category: "自然・観光", description: "多数の島々が浮かぶ景勝地。" },

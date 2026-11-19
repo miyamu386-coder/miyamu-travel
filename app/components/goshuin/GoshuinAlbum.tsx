@@ -15,11 +15,17 @@ import {
 type Props = {
     records: GoshuinRecord[];
     onAdd: () => void;
+    onDelete: (record: GoshuinRecord) => Promise<void>;
+    disabled: boolean;
+    error: string;
 };
 
 export default function GoshuinAlbum({
     records,
     onAdd,
+    onDelete,
+    disabled,
+    error,
 }: Props) {
     const [imageUrls, setImageUrls] =
         useState<Record<string, string>>({});
@@ -60,10 +66,13 @@ export default function GoshuinAlbum({
             <button
                 type="button"
                 onClick={onAdd}
+                disabled={disabled}
                 style={styles.addButton}
             >
                 ＋ 御朱印を追加
             </button>
+
+            {error && <p role="alert">{error}</p>}
 
             {records.length === 0 ? (
                 <div style={styles.empty}>
@@ -101,6 +110,15 @@ export default function GoshuinAlbum({
                             <span style={styles.date}>
                                 {record.receivedAt}
                             </span>
+                            <button
+                                type="button"
+                                disabled={disabled}
+                                aria-label={`${record.placeName}の御朱印を削除`}
+                                onClick={() => void onDelete(record)}
+                                style={{ alignSelf: "flex-start", color: "#9b2929" }}
+                            >
+                                削除
+                            </button>
                         </article>
                     ))}
                 </div>

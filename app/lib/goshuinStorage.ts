@@ -7,9 +7,7 @@ import {
   Encoding,
   Filesystem,
 } from "@capacitor/filesystem";
-import {
-  Capacitor,
-} from "@capacitor/core";
+import { getTravelPhotoUrl } from "./photoStorage";
 
 const GOSHUIN_DIRECTORY = "goshuin";
 
@@ -64,6 +62,24 @@ export async function saveGoshuinRecords(
   encoding: Encoding.UTF8,
 });
 }
+export async function removeGoshuinRecord(
+  records: GoshuinRecord[],
+  record: GoshuinRecord,
+): Promise<GoshuinRecord[]> {
+  const next = records.filter((item) => item.id !== record.id);
+  await saveGoshuinRecords(next);
+
+  if (/^goshuin\/[0-9a-f-]+\.jpeg$/i.test(record.imageUrl) &&
+      !next.some((item) => item.imageUrl === record.imageUrl)) {
+    try {
+      await Filesystem.deleteFile({ path: record.imageUrl, directory: Directory.Data });
+    } catch (error) {
+      console.warn("御朱印の画像ファイルを削除できませんでした", error);
+    }
+  }
+  return next;
+}
+
 /**
  * 保存済みの御朱印記録を読み込む
  */
@@ -97,13 +113,5 @@ export async function loadGoshuinRecords(): Promise<
 export async function loadGoshuinImage(
   path: string,
 ): Promise<string> {
-  const result =
-    await Filesystem.getUri({
-      path,
-      directory: Directory.Data,
-    });
-
-  return Capacitor.convertFileSrc(
-  result.uri,
-);
+  return getTravelPhotoUrl(path);
 }

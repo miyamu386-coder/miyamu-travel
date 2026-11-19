@@ -1,4 +1,9 @@
+import type { PrefectureId } from "../../types/travel";
+import JapanOverviewArtwork from "./JapanOverviewArtwork";
+
 type Props = {
+  visitedIds: ReadonlySet<PrefectureId>;
+  hokkaidoComplete: boolean;
   onSelectRegion: (
     region:
       | "hokkaido"
@@ -14,14 +19,12 @@ type Props = {
 
 export default function JapanOverviewSvg({
   onSelectRegion,
+  visitedIds,
+  hokkaidoComplete,
 }: Props) {
   return (
     <div className="japan-overview">
-      <img
-        src="/maps/japan-prefecture-map.svg"
-        alt="日本地図"
-        className="japan-overview-map"
-      />
+      <JapanOverviewArtwork visitedIds={visitedIds} hokkaidoComplete={hokkaidoComplete} />
 
       <button
         className="map-hotspot hotspot-hokkaido"

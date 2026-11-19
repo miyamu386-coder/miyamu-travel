@@ -1,0 +1,6 @@
+Japan ADM1 boundaries: geoBoundaries gbOpen, boundary ID JPN-ADM1.
+Source: OpenStreetMap contributors and Wambacher, retrieved by geoBoundaries.
+The original, simplified GeoJSON is distributed unmodified under ODbL 1.0.
+https://github.com/wmgeolab/geoBoundaries/tree/9469f09/releaseData/gbOpen/JPN/ADM1
+https://www.openstreetmap.org/copyright
+https://opendatacommons.org/licenses/odbl/1-0/

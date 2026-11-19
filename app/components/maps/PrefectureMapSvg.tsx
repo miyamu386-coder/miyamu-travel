@@ -18,7 +18,7 @@ type PrefectureMapData = {
 };
 
 const mapStyle = {
-    fill: "#e8e8e8",
+    fill: "var(--prefecture-fill, #e8e8e8)",
     stroke: "#333",
     strokeWidth: 1,
     strokeLinejoin: "round" as const,

@@ -1,4 +1,5 @@
 type Props = {
+  visitedIds?: ReadonlySet<string>;
   onSelectPrefecture: (
     prefectureId: string
   ) => void;
@@ -21,6 +22,7 @@ const textStyle = {
 
 export default function KantoMapSvg({
   onSelectPrefecture,
+  visitedIds,
 }: Props) {
   return (
     <div className="region-map">
@@ -35,7 +37,7 @@ export default function KantoMapSvg({
         {/* 群馬県 */}
         <g
           transform="translate(806.51001 415.634125)"
-          style={mapStyle}
+          style={{ ...mapStyle, fill: visitedIds?.has("gunma") ? "#83d6a0" : mapStyle.fill }}
           onClick={() =>
             onSelectPrefecture("gunma")
           }
@@ -84,7 +86,7 @@ export default function KantoMapSvg({
         {/* 栃木県 */}
         <g
           transform="translate(852.51001 408.634125)"
-          style={mapStyle}
+          style={{ ...mapStyle, fill: visitedIds?.has("tochigi") ? "#83d6a0" : mapStyle.fill }}
           onClick={() =>
             onSelectPrefecture("tochigi")
           }
@@ -122,7 +124,7 @@ export default function KantoMapSvg({
         {/* 茨城県 */}
         <g
           transform="translate(871.51001 420.634125)"
-          style={mapStyle}
+          style={{ ...mapStyle, fill: visitedIds?.has("ibaraki") ? "#83d6a0" : mapStyle.fill }}
           onClick={() =>
             onSelectPrefecture("ibaraki")
           }
@@ -166,7 +168,7 @@ export default function KantoMapSvg({
         {/* 埼玉県 */}
         <g
           transform="translate(822.51001 463.634125)"
-          style={mapStyle}
+          style={{ ...mapStyle, fill: visitedIds?.has("saitama") ? "#83d6a0" : mapStyle.fill }}
           onClick={() =>
             onSelectPrefecture("saitama")
           }
@@ -201,7 +203,7 @@ export default function KantoMapSvg({
         {/* 千葉県 */}
         <g
           transform="translate(876.51001 474.634125)"
-          style={mapStyle}
+          style={{ ...mapStyle, fill: visitedIds?.has("chiba") ? "#83d6a0" : mapStyle.fill }}
           onClick={() =>
             onSelectPrefecture("chiba")
           }
@@ -245,7 +247,7 @@ export default function KantoMapSvg({
         {/* 東京都 */}
         <g
           transform="translate(834.51001 487.634125)"
-          style={mapStyle}
+          style={{ ...mapStyle, fill: visitedIds?.has("tokyo") ? "#83d6a0" : mapStyle.fill }}
           onClick={() =>
             onSelectPrefecture("tokyo")
           }
@@ -285,7 +287,7 @@ export default function KantoMapSvg({
         {/* 神奈川県 */}
         <g
           transform="translate(833.51001 501.634094)"
-          style={mapStyle}
+          style={{ ...mapStyle, fill: visitedIds?.has("kanagawa") ? "#83d6a0" : mapStyle.fill }}
           onClick={() =>
             onSelectPrefecture("kanagawa")
           }

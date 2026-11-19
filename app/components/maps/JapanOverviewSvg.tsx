@@ -24,7 +24,7 @@ export default function JapanOverviewSvg({
   hokkaidoComplete,
 }: Props) {
   return (
-    <div className={`japan-overview ${styles.ocean}`}>
+    <div className="japan-overview">
       <div className={styles.mofu} aria-hidden="true" />
       <JapanOverviewArtwork visitedIds={visitedIds} hokkaidoComplete={hokkaidoComplete} />
 

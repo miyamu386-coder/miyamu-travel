@@ -1,27 +1,21 @@
-.ocean {
+.home {
+  position: relative;
   isolation: isolate;
-  border-radius: 22px;
-  background:
-    radial-gradient(ellipse at 18% 15%, #f3fcf7 0%, transparent 52%),
-    linear-gradient(145deg, #e3f5ef, #d0e9ee 60%, #bcdce7);
-  box-shadow: inset 0 0 0 1px #75afb52b;
+  min-height: 100svh;
 }
 
-.ocean::before {
+.home::before {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
-  border-radius: inherit;
-  background-image: radial-gradient(
-    ellipse at 50% -5px,
-    transparent 15px,
-    #ffffff65 16px,
-    #ffffff65 17px,
-    transparent 18px
-  );
-  background-size: 62px 30px;
   pointer-events: none;
+  background-image:
+    radial-gradient(ellipse at 50% -5px, transparent 15px, #ffffff65 16px, #ffffff65 17px, transparent 18px),
+    radial-gradient(ellipse at 18% 15%, #f3fcf7 0%, transparent 52%),
+    linear-gradient(145deg, #e3f5ef, #d0e9ee 60%, #bcdce7);
+  background-size: 62px 30px, 100% 100%, 100% 100%;
+  background-repeat: repeat, no-repeat, no-repeat;
 }
 
 .mofu {

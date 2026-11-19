@@ -1,0 +1,35 @@
+.ocean {
+  isolation: isolate;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 18% 15%, #f3fcf7 0%, transparent 52%),
+    linear-gradient(145deg, #e3f5ef, #d0e9ee 60%, #bcdce7);
+  box-shadow: inset 0 0 0 1px #75afb52b;
+}
+
+.ocean::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: radial-gradient(
+    ellipse at 50% -5px,
+    transparent 15px,
+    #ffffff65 16px,
+    #ffffff65 17px,
+    transparent 18px
+  );
+  background-size: 62px 30px;
+  pointer-events: none;
+}
+
+.mofu {
+  position: absolute;
+  top: 9%;
+  left: 8%;
+  width: 28%;
+  aspect-ratio: 1;
+  background: url("/mofu/tokotoko-sprites.png") 100% 100% / 200% 200% no-repeat;
+  pointer-events: none;
+}

@@ -1,5 +1,8 @@
 import UIKit
 import Capacitor
+import WatchConnectivity
+import CoreLocation
+import MapKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,7 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        TravelWatchSender.shared.start()
         return true
     }
 
@@ -40,5 +43,554 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                                           sessionRole: connectingSceneSession.role)
         config.delegateClass = SceneDelegate.self
         return config
+    }
+}
+
+final class TravelWatchBridgeViewController: CAPBridgeViewController {
+    override func capacitorDidLoad() {
+        super.capacitorDidLoad()
+        bridge?.registerPluginInstance(TravelWatchPlugin())
+    }
+}
+
+@objc(TravelWatchPlugin)
+public final class TravelWatchPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "TravelWatchPlugin"
+    public let jsName = "TravelWatch"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "updateVisits", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "searchPlaces", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getRoutes", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "startNavigation", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "stopNavigation", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "openWalkingMap", returnType: CAPPluginReturnPromise)
+    ]
+
+
+
+
+    private let routeLocation = TravelRouteLocation()
+
+    @objc func getRoutes(_ call: CAPPluginCall) {
+        guard let latitude = call.getDouble("latitude"),
+              let longitude = call.getDouble("longitude"),
+              (-90...90).contains(latitude),
+              (-180...180).contains(longitude) else {
+            call.reject("目的地の座標が正しくありません")
+            return
+        }
+
+        DispatchQueue.main.async {
+            self.routeLocation.getLocation { result in
+                switch result {
+                case .failure(let error):
+                    call.reject(error.localizedDescription)
+                case .success(let location):
+                    self.calculateRoutes(
+                        from: location.coordinate,
+                        to: CLLocationCoordinate2D(
+                            latitude: latitude,
+                            longitude: longitude
+                        ),
+                        call: call
+                    )
+                }
+            }
+        }
+    }
+
+    private func calculateRoutes(
+        from source: CLLocationCoordinate2D,
+        to destination: CLLocationCoordinate2D,
+        call: CAPPluginCall
+    ) {
+        let modes: [(String, MKDirectionsTransportType)] = [
+            ("walking", .walking),
+            ("driving", .automobile),
+            ("transit", .transit)
+        ]
+
+        let group = DispatchGroup()
+        var results: [[String: Any]] = []
+
+        for (mode, transportType) in modes {
+            group.enter()
+
+            let request = MKDirections.Request()
+            request.source = MKMapItem(
+                placemark: MKPlacemark(coordinate: source)
+            )
+            request.destination = MKMapItem(
+                placemark: MKPlacemark(coordinate: destination)
+            )
+            request.transportType = transportType
+
+            let directions = MKDirections(request: request)
+
+            directions.calculate { response, error in
+                var result: [String: Any] = [
+                    "mode": mode,
+                    "available": false
+                ]
+
+                if let route = response?.routes.first {
+                    result["available"] = true
+                    result["distance"] = Int(route.distance.rounded())
+                    result["minutes"] = Int(
+                        (route.expectedTravelTime / 60).rounded()
+                    )
+                } else if let error {
+                    result["error"] = error.localizedDescription
+                }
+
+                results.append(result)
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            call.resolve(["routes": results])
+        }
+    }
+
+    @objc func searchPlaces(_ call: CAPPluginCall) {
+        let query = (call.getString("query") ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !query.isEmpty, query.count <= 150 else {
+            call.reject("検索キーワードを1〜150文字で入力してください")
+            return
+        }
+
+        DispatchQueue.main.async {
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = query
+
+            let search = MKLocalSearch(request: request)
+
+            search.start { response, error in
+                guard let response = response else {
+                    call.reject(error?.localizedDescription ?? "検索できませんでした")
+                    return
+                }
+
+                let places: [[String: Any]] = response.mapItems
+                    .prefix(15)
+                    .map { item in
+                        let coordinate = item.placemark.coordinate
+
+                        return [
+                            "name": item.name ?? "名称未設定",
+                            "address": item.placemark.title ?? "",
+                            "latitude": coordinate.latitude,
+                            "longitude": coordinate.longitude
+                        ]
+                    }
+
+                call.resolve(["places": places])
+            }
+        }
+    }
+
+    @objc func startNavigation(_ call: CAPPluginCall) {
+        guard let name = call.getString("name")?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !name.isEmpty,
+              name.count <= 250,
+              let latitude = call.getDouble("latitude"),
+              let longitude = call.getDouble("longitude"),
+              (-90...90).contains(latitude),
+              (-180...180).contains(longitude) else {
+            call.reject("目的地を選択してください")
+            return
+        }
+
+        DispatchQueue.main.async {
+            TravelWalkingNavigation.shared.start(
+                name: name,
+                coordinate: CLLocationCoordinate2D(
+                    latitude: latitude,
+                    longitude: longitude
+                )
+            )
+        }
+        call.resolve()
+    }
+
+    @objc func stopNavigation(_ call: CAPPluginCall) {
+        DispatchQueue.main.async { TravelWalkingNavigation.shared.stop() }
+        call.resolve()
+    }
+
+    @objc func openWalkingMap(_ call: CAPPluginCall) {
+        guard let name = call.getString("name"),
+              let latitude = call.getDouble("latitude"),
+              let longitude = call.getDouble("longitude"),
+              (-90...90).contains(latitude),
+              (-180...180).contains(longitude) else {
+            call.reject("目的地が正しくありません")
+            return
+        }
+
+        DispatchQueue.main.async {
+            guard let root = self.bridge?.viewController else {
+                call.reject("画面を開けませんでした")
+                return
+            }
+
+            let map = TravelMofuMapViewController(
+                name: name,
+                coordinate: CLLocationCoordinate2D(
+                    latitude: latitude,
+                    longitude: longitude
+                ),
+                mode: call.getString("mode") ?? "walking"
+            )
+
+            root.present(map, animated: true)
+            call.resolve()
+        }
+    }
+
+    @objc func updateVisits(_ call: CAPPluginCall) {
+        guard let count = call.getInt("count"), (0...47).contains(count) else {
+            call.reject("Invalid prefecture count")
+            return
+        }
+        let name = String((call.getString("latestName") ?? "").prefix(250))
+        let date = String((call.getString("latestDate") ?? "").prefix(10))
+        DispatchQueue.main.async {
+            TravelWatchSender.shared.update(count: count, name: name, date: date)
+        }
+        call.resolve()
+    }
+}
+
+private final class TravelWatchSender: NSObject, WCSessionDelegate {
+    static let shared = TravelWatchSender()
+    private var summary: [String: Any]?
+    private var navigation: [String: Any]?
+
+    func updateNavigation(_ state: [String: Any]?) {
+        navigation = state
+        publish()
+    }
+
+    func start() {
+        guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        session.delegate = self
+        session.activate()
+    }
+
+    func update(count: Int, name: String, date: String) {
+        summary = ["count": count, "latestName": name, "latestDate": date]
+        publish()
+    }
+
+    private func publish() {
+        guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        guard session.activationState == .activated,
+              session.isPaired, session.isWatchAppInstalled else { return }
+        var context = summary ?? [:]
+        context["navigation"] = navigation
+        if NSDictionary(dictionary: context).isEqual(to: session.applicationContext) { return }
+        do {
+            try session.updateApplicationContext(context)
+        } catch {
+            NSLog("Travel Watch summary sync: %@", error.localizedDescription)
+        }
+    }
+
+    func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
+        guard state == .activated else { return }
+        DispatchQueue.main.async { self.publish() }
+    }
+
+    func sessionWatchStateDidChange(_ session: WCSession) {
+        DispatchQueue.main.async { self.publish() }
+    }
+
+    func sessionDidBecomeInactive(_ session: WCSession) {}
+
+    func sessionDidDeactivate(_ session: WCSession) {
+        session.activate()
+    }
+}
+
+
+private final class TravelRouteLocation: NSObject, CLLocationManagerDelegate {
+    private let manager = CLLocationManager()
+    private var completion: ((Result<CLLocation, Error>) -> Void)?
+
+    override init() {
+        super.init()
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+    }
+
+    func getLocation(
+        completion: @escaping (Result<CLLocation, Error>) -> Void
+    ) {
+        self.completion = completion
+
+        switch manager.authorizationStatus {
+        case .notDetermined:
+            manager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            manager.requestLocation()
+        default:
+            finish(.failure(NSError(
+                domain: "TravelLocation",
+                code: 1,
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        "iPhoneの設定で位置情報を許可してください"
+                ]
+            )))
+        }
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        if manager.authorizationStatus == .authorizedAlways ||
+           manager.authorizationStatus == .authorizedWhenInUse {
+            if completion != nil {
+                manager.requestLocation()
+            }
+        }
+    }
+
+    func locationManager(
+        _ manager: CLLocationManager,
+        didUpdateLocations locations: [CLLocation]
+    ) {
+        guard let location = locations.last else { return }
+        finish(.success(location))
+    }
+
+    func locationManager(
+        _ manager: CLLocationManager,
+        didFailWithError error: Error
+    ) {
+        finish(.failure(error))
+    }
+
+    private func finish(_ result: Result<CLLocation, Error>) {
+        guard let completion else { return }
+        self.completion = nil
+        completion(result)
+    }
+}
+
+private final class TravelWalkingNavigation: NSObject, CLLocationManagerDelegate {
+    static let shared = TravelWalkingNavigation()
+    private let manager = CLLocationManager()
+    private var destinationName = ""
+    private var destinationCoordinate: CLLocationCoordinate2D?
+    private var isRunning = false
+    private var search: MKLocalSearch?
+    private var directions: MKDirections?
+    private var route: TravelWalkingRoute?
+    private var generation = 0
+
+    override init() {
+        super.init()
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.distanceFilter = 5
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(pause), name: UIApplication.didEnterBackgroundNotification, object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(resume), name: UIApplication.didBecomeActiveNotification, object: nil
+        )
+    }
+
+    func start(name: String, coordinate: CLLocationCoordinate2D) {
+        reset()
+        destinationName = name
+        destinationCoordinate = coordinate
+        isRunning = true
+        send("現在地を確認中")
+        resume()
+    }
+
+    func stop() {
+        reset()
+        TravelWatchSender.shared.updateNavigation(nil)
+    }
+
+    private func reset() {
+        isRunning = false
+        generation += 1
+        manager.stopUpdatingLocation()
+        search?.cancel()
+        directions?.cancel()
+        search = nil
+        directions = nil
+        route = nil
+    }
+
+    @objc private func pause() {
+        guard isRunning else { return }
+        reset()
+        isRunning = true
+        send("一時停止中。iPhoneでTravelを開いてね")
+    }
+
+    @objc private func resume() {
+        guard isRunning, UIApplication.shared.applicationState == .active else { return }
+        switch manager.authorizationStatus {
+        case .notDetermined:
+            manager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            manager.startUpdatingLocation()
+        default:
+            fail("iPhoneの設定で位置情報を許可してね")
+        }
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        resume()
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        guard isRunning, (error as? CLError)?.code != .locationUnknown else { return }
+        fail("現在地を取得できないぞ")
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard isRunning, let location = locations.last,
+              abs(location.timestamp.timeIntervalSinceNow) < 15,
+              (0...35).contains(location.horizontalAccuracy) else { return }
+        let point = MKMapPoint(location.coordinate)
+        if let route {
+            let progress = route.progress(at: point)
+            if progress.offset > max(25, location.horizontalAccuracy + 10) {
+                send("ルートを外れたようだ。iPhoneで案内を再開してね")
+            } else if progress.remaining <= 12 && point.distance(to: route.end) <= 18 {
+                reset()
+                send("着いたぞ！", remaining: 0)
+            } else {
+                let instruction = progress.instruction
+                send(instruction, remaining: Int(progress.remaining.rounded()), turn: progress.turn)
+            }
+            return
+        }
+
+        guard search == nil, directions == nil else { return }
+        guard let destinationCoordinate else {
+            fail("目的地が設定されていないぞ")
+            return
+        }
+
+        findRoute(
+            from: location.coordinate,
+            to: MKMapItem(
+                placemark: MKPlacemark(coordinate: destinationCoordinate)
+            )
+        )
+    }
+
+    private func findRoute(from source: CLLocationCoordinate2D, to place: MKMapItem) {
+        let request = MKDirections.Request()
+        request.source = MKMapItem(placemark: MKPlacemark(coordinate: source))
+        request.destination = place
+        request.transportType = .walking
+        let directions = MKDirections(request: request)
+        self.directions = directions
+        let generation = self.generation
+        directions.calculate { [weak self] response, _ in
+            DispatchQueue.main.async {
+                guard let self, self.isRunning, self.generation == generation else { return }
+                self.directions = nil
+                guard let result = response?.routes.first,
+                      let route = TravelWalkingRoute(result) else {
+                    self.fail("徒歩ルートが見つからないぞ")
+                    return
+                }
+                self.route = route
+                let progress = route.progress(at: MKMapPoint(source))
+                self.send(progress.instruction, remaining: Int(progress.remaining.rounded()), turn: progress.turn)
+            }
+        }
+    }
+
+    private func fail(_ instruction: String) {
+        reset()
+        send(instruction)
+    }
+
+    private func send(_ instruction: String, remaining: Int? = nil, turn: Int? = nil) {
+        var state: [String: Any] = ["destination": destinationName, "instruction": instruction]
+        state["remaining"] = remaining
+        state["turn"] = turn
+        TravelWatchSender.shared.updateNavigation(state)
+    }
+}
+
+private struct TravelWalkingRoute {
+    private struct Segment {
+        let start: MKMapPoint
+        let end: MKMapPoint
+        let offset: Double
+        let length: Double
+    }
+
+    private var segments: [Segment] = []
+    private var maneuvers: [(offset: Double, text: String)] = []
+    private var length = 0.0
+    let end: MKMapPoint
+
+    init?(_ route: MKRoute) {
+        let points = route.polyline.points()
+        guard route.polyline.pointCount >= 2 else { return nil }
+        end = points[route.polyline.pointCount - 1]
+        for index in 1..<route.polyline.pointCount {
+            let start = points[index - 1]
+            let next = points[index]
+            let segmentLength = start.distance(to: next)
+            guard segmentLength > 0 else { continue }
+            segments.append(Segment(start: start, end: next, offset: length, length: segmentLength))
+            length += segmentLength
+        }
+        guard length > 0 else { return nil }
+
+        var earliestOffset = 0.0
+        for step in route.steps where !step.instructions.isEmpty && step.polyline.pointCount > 0 {
+            let start = step.polyline.points()[0]
+            let position = project(start, after: earliestOffset).distance
+            earliestOffset = position
+            if step.distance > 0 {
+                maneuvers.append((position, step.instructions))
+            }
+        }
+    }
+
+    func progress(at point: MKMapPoint) -> (remaining: Double, offset: Double, instruction: String, turn: Int?) {
+        let position = project(point)
+        let remaining = max(0, length - position.distance)
+        guard let next = maneuvers.first(where: { $0.offset >= position.distance - 8 }) else {
+            return (remaining, position.offset, "目的地まで道なりだぞ", nil)
+        }
+        let turn = Int(max(0, next.offset - position.distance).rounded())
+        return (remaining, position.offset, next.text, turn)
+    }
+
+    private func project(_ point: MKMapPoint, after minimum: Double = 0) -> (distance: Double, offset: Double) {
+        var best = (distance: minimum, offset: Double.infinity)
+        for segment in segments where segment.offset + segment.length >= minimum {
+            let dx = segment.end.x - segment.start.x
+            let dy = segment.end.y - segment.start.y
+            let fraction = ((point.x - segment.start.x) * dx + (point.y - segment.start.y) * dy) / (dx * dx + dy * dy)
+            let minimumFraction = max(0, (minimum - segment.offset) / segment.length)
+            let position = min(1, max(minimumFraction, fraction))
+            let projected = MKMapPoint(x: segment.start.x + position * dx, y: segment.start.y + position * dy)
+            let offset = point.distance(to: projected)
+            if offset < best.offset {
+                best = (distance: segment.offset + position * segment.length, offset: offset)
+            }
+        }
+        return best
     }
 }

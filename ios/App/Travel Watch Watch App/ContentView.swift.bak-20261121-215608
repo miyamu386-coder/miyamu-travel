@@ -1,0 +1,205 @@
+import Combine
+import SwiftUI
+import WatchConnectivity
+
+struct ContentView: View {
+    @StateObject private var visits = TravelWatchVisits()
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 8) {
+                Label("みやむTravel", systemImage: "pawprint.fill")
+                    .font(.caption)
+                    .foregroundStyle(.cyan)
+
+                if let navigation = visits.navigation {
+                    Text(navigation.destination)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    Spacer(minLength: 4)
+
+                    Group {
+                        if navigation.mode == "driving" || navigation.mode == "transit" {
+                            TravelVehicleMofuView(mode: navigation.mode)
+                        } else {
+                            TokotokoMofuWatchView()
+                        }
+                    }
+                    .frame(height: 70)
+
+                    Spacer(minLength: 4)
+
+                    if let remaining = navigation.remaining, remaining > 0 {
+                        Text("あと \(remaining) m")
+                            .font(.title2.bold().monospacedDigit())
+                    }
+
+                    Text(navigation.instruction)
+                        .font(.body)
+                        .multilineTextAlignment(.center)
+
+                    if let turn = navigation.turn, turn > 0 {
+                        Text("次の案内まで \(turn) m")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                } else if let summary = visits.summary {
+                    TokotokoMofuWatchView()
+                        .frame(height: 70)
+
+                    Text("訪問済み")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Text("\(summary.count) / 47")
+                        .font(.title.bold().monospacedDigit())
+
+                    Text(summary.latestName.isEmpty
+                         ? "まだ訪問記録がありません"
+                         : summary.latestName)
+                        .font(.caption)
+                } else {
+                    TokotokoMofuWatchView()
+                        .frame(height: 70)
+
+                    Text("iPhoneでTravelを開いて同期")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 8)
+        }
+    }
+}
+
+private struct TravelVisitSummary: Sendable {
+    let count: Int
+    let latestName: String
+    let latestDate: String
+
+    init?(_ context: [String: Any]) {
+        guard let count = context["count"] as? Int, (0...47).contains(count) else { return nil }
+        self.count = count
+        latestName = context["latestName"] as? String ?? ""
+        latestDate = context["latestDate"] as? String ?? ""
+    }
+}
+
+private struct TravelNaviState: Sendable {
+    let destination: String
+    let instruction: String
+    let remaining: Int?
+    let turn: Int?
+    let mode: String
+
+    init?(_ values: [String: Any]?) {
+        guard let values,
+              let destination = values["destination"] as? String,
+              let instruction = values["instruction"] as? String else { return nil }
+        self.destination = destination
+        self.instruction = instruction
+        remaining = values["remaining"] as? Int
+        turn = values["turn"] as? Int
+        let receivedMode = values["mode"] as? String ?? "walking"
+        mode = ["walking", "driving", "transit"].contains(receivedMode)
+            ? receivedMode : "walking"
+    }
+}
+
+private final class TravelWatchVisits: NSObject, ObservableObject, WCSessionDelegate {
+    @Published private(set) var summary: TravelVisitSummary?
+    @Published private(set) var navigation: TravelNaviState?
+
+    override init() {
+        super.init()
+        guard WCSession.isSupported() else { return }
+        let session = WCSession.default
+        session.delegate = self
+        session.activate()
+    }
+
+    func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
+        guard state == .activated else { return }
+        receive(session.receivedApplicationContext)
+    }
+
+    func session(_ session: WCSession, didReceiveApplicationContext context: [String: Any]) {
+        receive(context)
+    }
+
+    #if os(iOS)
+    func sessionDidBecomeInactive(_ session: WCSession) {}
+
+    func sessionDidDeactivate(_ session: WCSession) {
+        session.activate()
+    }
+    #endif
+
+    private func receive(_ context: [String: Any]) {
+        let summary = TravelVisitSummary(context)
+        let navigation = TravelNaviState(context["navigation"] as? [String: Any])
+        DispatchQueue.main.async {
+            self.summary = summary
+            self.navigation = navigation
+        }
+    }
+}
+
+private struct TokotokoMofuWatchView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private let dimmed = false
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var startedAt: Date?
+    @State private var hasWalked = false
+
+    private let walkDuration = 1.2
+    private let mofuSize: CGFloat = 46
+
+    private var canWalk: Bool {
+        !reduceMotion && !dimmed && scenePhase == .active
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            if canWalk, let startedAt {
+                TimelineView(.animation(minimumInterval: 1.0 / 15.0)) { context in
+                    let elapsed = max(0, context.date.timeIntervalSince(startedAt))
+                    let progress = min(1, elapsed / walkDuration)
+                    let pose = progress == 1 ? "TravelMofuRest"
+                        : Int(elapsed * 6).isMultiple(of: 2) ? "TravelMofuStep1" : "TravelMofuStep2"
+                    let center = max(0, (geometry.size.width - mofuSize) / 2)
+                    mofu(pose)
+                        .offset(x: center * CGFloat(progress))
+                }
+            } else {
+                mofu("TravelMofuRest")
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .frame(height: mofuSize)
+        .accessibilityHidden(true)
+        .allowsHitTesting(false)
+        .task(id: canWalk) {
+            startedAt = nil
+            guard canWalk, !hasWalked else { return }
+            hasWalked = true
+            startedAt = Date()
+            do {
+                try await Task.sleep(nanoseconds: 1_200_000_000)
+                startedAt = nil
+            } catch {
+                // A new task handles the changed screen state.
+            }
+        }
+    }
+
+    private func mofu(_ name: String) -> some View {
+        Image(name)
+            .resizable()
+            .scaledToFit()
+            .frame(width: mofuSize, height: mofuSize)
+    }
+}

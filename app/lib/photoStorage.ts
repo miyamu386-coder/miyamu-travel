@@ -6,6 +6,7 @@ import {
 import { Capacitor } from "@capacitor/core";
 
 export type TravelPhoto = {
+  albumId?: string;
   id: string;
   title: string;
   prefectureId: string;

@@ -1,0 +1,40 @@
+import SwiftUI
+
+struct TravelVehicleMofuView: View {
+    let mode: String
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private let dimmed = false
+    @Environment(\.scenePhase) private var scenePhase
+
+    private var prefix: String {
+        mode == "driving" ? "TravelMofuCar" : "TravelMofuTrain"
+    }
+
+    private var canAnimate: Bool {
+        !reduceMotion && !dimmed && scenePhase == .active
+    }
+
+    var body: some View {
+        Group {
+            if canAnimate {
+                TimelineView(.animation(minimumInterval: 1.0 / 6.0)) { context in
+                    let frame = Int(context.date.timeIntervalSinceReferenceDate * 6) % 6 + 1
+                    mofu("\(prefix)\(frame)")
+                }
+            } else {
+                mofu("\(prefix)1")
+            }
+        }
+        .accessibilityHidden(true)
+        .allowsHitTesting(false)
+    }
+
+    private func mofu(_ name: String) -> some View {
+        Image(name)
+            .resizable()
+            .scaledToFit()
+            .frame(maxWidth: .infinity)
+            .frame(height: 65)
+    }
+}

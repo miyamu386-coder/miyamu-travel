@@ -1,0 +1,144 @@
+import SwiftUI
+
+struct TravelMofuSceneryView: View {
+    let mode: String
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+
+    private var canAnimate: Bool {
+        !reduceMotion && scenePhase == .active
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.72, green: 0.88, blue: 0.94),
+                                Color(red: 0.92, green: 0.96, blue: 0.91)
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+
+                if canAnimate {
+                    TimelineView(.animation(minimumInterval: 1.0 / 12.0)) { context in
+                        scenery(
+                            size: geometry.size,
+                            time: context.date.timeIntervalSinceReferenceDate
+                        )
+                    }
+                } else {
+                    scenery(size: geometry.size, time: 0)
+                }
+
+                Group {
+                    if mode == "driving" || mode == "transit" {
+                        TravelVehicleMofuView(mode: mode)
+                    } else {
+                        WalkingMofuLoopView()
+                    }
+                }
+                .padding(.horizontal, 8)
+            }
+            .frame(
+                width: geometry.size.width,
+                height: geometry.size.height
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .accessibilityLabel("モフと一緒に移動中")
+    }
+
+    @ViewBuilder
+    private func scenery(size: CGSize, time: TimeInterval) -> some View {
+        let speed = mode == "driving" ? 26.0 :
+                    mode == "transit" ? 18.0 : 9.0
+
+        let offset = CGFloat(time * speed)
+            .truncatingRemainder(dividingBy: 60)
+
+        ZStack {
+            if mode == "transit" {
+                ForEach(0..<6, id: \.self) { index in
+                    Rectangle()
+                        .fill(.white.opacity(0.45))
+                        .frame(width: 8, height: 42)
+                        .position(
+                            x: CGFloat(index) * 60 - offset + 20,
+                            y: 37
+                        )
+                }
+
+                Rectangle()
+                    .fill(Color.gray.opacity(0.45))
+                    .frame(height: 5)
+                    .position(x: size.width / 2, y: size.height - 18)
+
+            } else {
+                ForEach(0..<6, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color.green.opacity(0.45))
+                        .frame(width: 20, height: 32)
+                        .position(
+                            x: CGFloat(index) * 60 - offset + 20,
+                            y: 45
+                        )
+                }
+
+                Rectangle()
+                    .fill(Color.gray.opacity(0.38))
+                    .frame(height: 28)
+                    .position(
+                        x: size.width / 2,
+                        y: size.height - 14
+                    )
+
+                ForEach(0..<6, id: \.self) { index in
+                    Rectangle()
+                        .fill(.white.opacity(0.8))
+                        .frame(width: 22, height: 3)
+                        .position(
+                            x: CGFloat(index) * 60 - offset + 20,
+                            y: size.height - 12
+                        )
+                }
+            }
+        }
+    }
+}
+
+private struct WalkingMofuLoopView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+
+    var body: some View {
+        Group {
+            if !reduceMotion && scenePhase == .active {
+                TimelineView(.animation(minimumInterval: 1.0 / 6.0)) { context in
+                    let tick = Int(
+                        context.date.timeIntervalSinceReferenceDate * 6
+                    )
+                    let imageName = tick % 2 == 0
+                        ? "TravelMofuStep1"
+                        : "TravelMofuStep2"
+
+                    image(imageName)
+                }
+            } else {
+                image("TravelMofuRest")
+            }
+        }
+    }
+
+    private func image(_ name: String) -> some View {
+        Image(name)
+            .resizable()
+            .scaledToFit()
+            .frame(height: 94)
+    }
+}

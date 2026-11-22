@@ -25,6 +25,9 @@ final class TravelMofuMapViewController: UIViewController, CLLocationManagerDele
     private var lastMovementTime = Date.distantPast
     private var movementTimer: Timer?
     private var lastCoordinate: CLLocationCoordinate2D?
+    private var speechLabel: UILabel?
+    private var speechHideWork: DispatchWorkItem?
+
 
     init(
         name: String,
@@ -59,6 +62,9 @@ final class TravelMofuMapViewController: UIViewController, CLLocationManagerDele
         mapView.addAnnotation(destination)
 
         loadMofuFrames()
+        setupMofuSpeech()
+        showMofuSpeech("さぁ、出発するぞ！")
+
 
         mofu.title = "モフ"
         mapView.addAnnotation(mofu)
@@ -105,6 +111,62 @@ final class TravelMofuMapViewController: UIViewController, CLLocationManagerDele
             longitudinalMeters: 1200
         )
         mapView.setRegion(region, animated: false)
+    }
+
+
+
+
+
+    private func setupMofuSpeech() {
+        let label = UILabel()
+        label.numberOfLines = 2
+        label.textAlignment = .center
+        label.font = .boldSystemFont(ofSize: 15)
+        label.textColor = .label
+        label.backgroundColor = .secondarySystemBackground
+        label.layer.cornerRadius = 16
+        label.layer.masksToBounds = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.isHidden = true
+
+        view.addSubview(label)
+
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.bottomAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                constant: -30
+            ),
+            label.widthAnchor.constraint(
+                lessThanOrEqualTo: view.widthAnchor,
+                constant: -32
+            ),
+            label.widthAnchor.constraint(
+                greaterThanOrEqualToConstant: 170
+            ),
+            label.heightAnchor.constraint(
+                greaterThanOrEqualToConstant: 52
+            )
+        ])
+
+        speechLabel = label
+    }
+
+    private func showMofuSpeech(_ message: String) {
+        speechHideWork?.cancel()
+
+        speechLabel?.text = message
+        speechLabel?.isHidden = false
+
+        let work = DispatchWorkItem { [weak self] in
+            self?.speechLabel?.isHidden = true
+        }
+
+        speechHideWork = work
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + 8,
+            execute: work
+        )
     }
 
     @objc private func closeMap() {
@@ -332,7 +394,13 @@ final class TravelMofuMapViewController: UIViewController, CLLocationManagerDele
         mofuView?.image = mofuFrames[0]
     }
 
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+
+
+
+
+
+
+func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         let renderer = MKPolylineRenderer(overlay: overlay)
         renderer.strokeColor = .systemGreen
         renderer.lineWidth = 6

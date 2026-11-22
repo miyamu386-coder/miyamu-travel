@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Capacitor, registerPlugin } from "@capacitor/core";
+import { useEffect, useState } from "react";
+import { Capacitor } from "@capacitor/core";
+import { watch as travelWatch } from "../lib/travelWatch";
 import styles from "./maps/JapanOverviewSvg.module.css";
 import JapanMap from "./JapanMap";
 import NaviWalkingMofu from "./NaviWalkingMofu";
+import NaviSearchMofu from "./NaviSearchMofu";
 
 type Place = {
   name: string;
@@ -20,26 +22,6 @@ type Route = {
   minutes?: number;
   error?: string;
 };
-
-const travelWatch = registerPlugin<{
-  searchPlaces(options: { query: string }): Promise<{ places: Place[] }>;
-  getRoutes(options: {
-    latitude: number;
-    longitude: number;
-  }): Promise<{ routes: Route[] }>;
-  startNavigation(options: {
-    name: string;
-    latitude: number;
-    longitude: number;
-  }): Promise<void>;
-  stopNavigation(): Promise<void>;
-  openWalkingMap(options: {
-    name: string;
-    latitude: number;
-    longitude: number;
-    mode: "walking" | "transit" | "driving";
-  }): Promise<void>;
-}>("TravelWatch");
 
 export default function TravelHome() {
   const [naviOpen, setNaviOpen] = useState(false);
@@ -59,6 +41,33 @@ export default function TravelHome() {
   const [travelingPlace, setTravelingPlace] = useState<Place | null>(null);
   const [travelingMinutes, setTravelingMinutes] = useState<number | null>(null);
 
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let disposed = false;
+    let removeListener: (() => Promise<void>) | undefined;
+
+    void travelWatch.addListener("tripEnded", () => {
+      setTravelingMode(null);
+      setTravelingPlace(null);
+      setTravelingMinutes(null);
+      setWatchMessage("");
+    }).then((handle) => {
+      if (disposed) {
+        void handle.remove();
+      } else {
+        removeListener = () => handle.remove();
+      }
+    }).catch((error) => {
+      console.error("Trip event listener failed:", error);
+    });
+
+    return () => {
+      disposed = true;
+      void removeListener?.();
+    };
+  }, []);
+
   async function openMofuWalkingMap() {
     if (!travelingPlace) return;
 
@@ -75,12 +84,13 @@ export default function TravelHome() {
     }
   }
 
-  function startIPhoneTrip(mode: "walking" | "transit" | "driving") {
-    if (!selectedPlace) return;
+  async function startIPhoneTrip(mode: "walking" | "transit" | "driving") {
+    if (!selectedPlace || watchBusy) return;
 
+    const place = selectedPlace;
     const route = routes.find((item) => item.mode === mode);
 
-    setTravelingPlace(selectedPlace);
+    setTravelingPlace(place);
     setTravelingMode(mode);
     setTravelingMinutes(
       route?.available && typeof route.minutes === "number"
@@ -88,51 +98,50 @@ export default function TravelHome() {
         : null
     );
     setNaviOpen(false);
-  }
 
-  function finishIPhoneTrip() {
-    setTravelingMode(null);
-    setTravelingPlace(null);
-    setTravelingMinutes(null);
-  }
-
-  async function startWatchNavigation() {
-    if (!selectedPlace || watchBusy) return;
+    if (!Capacitor.isNativePlatform()) return;
 
     setWatchBusy(true);
-    setWatchMessage("");
-
     try {
       await travelWatch.startNavigation({
-        name: selectedPlace.name,
-        latitude: selectedPlace.latitude,
-        longitude: selectedPlace.longitude,
+        name: place.name,
+        latitude: place.latitude,
+        longitude: place.longitude,
+        mode,
       });
-
-      setWatchMessage(
-        `⌚ ${selectedPlace.name}への徒歩ナビを開始したよ！`
-      );
+      setWatchMessage("");
     } catch (error) {
       console.error("Watch navigation failed:", error);
-      setWatchMessage("Watchナビを開始できませんでした。");
+      setWatchMessage("Watchへの連携を確認できませんでした。");
+    }
+
+    try {
+      await travelWatch.openWalkingMap({
+        name: place.name,
+        latitude: place.latitude,
+        longitude: place.longitude,
+        mode,
+      });
+    } catch (error) {
+      console.error("Mofu map failed:", error);
+      alert("モフの地図を開けませんでした。");
     } finally {
       setWatchBusy(false);
     }
   }
 
-  async function stopWatchNavigation() {
-    if (watchBusy) return;
+  async function finishIPhoneTrip() {
+    setTravelingMode(null);
+    setTravelingPlace(null);
+    setTravelingMinutes(null);
 
-    setWatchBusy(true);
+    if (!Capacitor.isNativePlatform()) return;
 
     try {
       await travelWatch.stopNavigation();
-      setWatchMessage("⌚ Watchナビを終了したよ。");
     } catch (error) {
       console.error("Watch navigation stop failed:", error);
-      setWatchMessage("Watchナビを終了できませんでした。");
-    } finally {
-      setWatchBusy(false);
+      setWatchMessage("Watchナビの終了を確認できませんでした。");
     }
   }
 
@@ -238,7 +247,7 @@ export default function TravelHome() {
         >
           <h2>🐾 モフと移動中！</h2>
 
-          <NaviWalkingMofu />
+          <NaviWalkingMofu mode={travelingMode} />
 
           <div style={{
             margin: "20px auto",
@@ -266,6 +275,17 @@ export default function TravelHome() {
                 : "所要時間はAppleマップで確認してね"}
             </p>
           </div>
+
+          {watchMessage && (
+            <p role="status" style={{
+              maxWidth: 420,
+              margin: "12px auto",
+              color: "#a33",
+              fontSize: 14,
+            }}>
+              {watchMessage}
+            </p>
+          )}
 
           <button
             type="button"
@@ -331,11 +351,13 @@ export default function TravelHome() {
             borderRadius: 20,
             padding: 24,
             width: "100%",
-            maxWidth: 420, maxHeight: "calc(100dvh - 180px)", overflowY: "auto", overscrollBehavior: "contain",
+            maxWidth: 420,
+            maxHeight: "calc(100dvh - 110px)",
+            overflowY: "auto",
+            overscrollBehavior: "contain",
           }}>
-            <h2>🐾 ……今日はどこに行く？</h2>
 
-            <NaviWalkingMofu />
+            <NaviSearchMofu />
 
             <label htmlFor="navi-destination">
               行きたい場所を入力
@@ -362,6 +384,8 @@ export default function TravelHome() {
               disabled={searching}
               onClick={() => void searchDestination()}
               style={{
+                display: "block",
+                width: "100%",
                 marginTop: 12,
                 padding: 12,
                 borderRadius: 10,
@@ -377,7 +401,7 @@ export default function TravelHome() {
             {places.length > 0 && (
               <div style={{
                 marginTop: 16,
-                maxHeight: 250,
+                maxHeight: 220,
                 overflowY: "auto",
               }}>
                 {places.map((place, index) => (
@@ -428,7 +452,7 @@ export default function TravelHome() {
                     <button
                       key={mode}
                       type="button"
-                      onClick={() => startIPhoneTrip(mode)}
+                      onClick={() => void startIPhoneTrip(mode)}
                       style={{
                         display: "block",
                         width: "100%",
@@ -451,7 +475,7 @@ export default function TravelHome() {
                             ? "Appleマップで電車・バスの経路を確認"
                             : "経路を取得できませんでした"}
                       </p>
-                      <small>🐾 タップしてモフと出発！</small>
+                      <small style={{ color: "#367965", fontWeight: 700 }}>🐾 モフと出発！</small>
                     </button>
                   );
                 })}
@@ -468,40 +492,6 @@ export default function TravelHome() {
                 <strong>📍 {selectedPlace.name}</strong>
                 <p>{selectedPlace.address}</p>
                 <small>目的地を選択したよ！</small>
-
-                <button
-                  type="button"
-                  disabled={watchBusy}
-                  onClick={() => void startWatchNavigation()}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    marginTop: 12,
-                    padding: 12,
-                    borderRadius: 12,
-                    background: "#dff3eb",
-                    border: "1px solid #91cdb5",
-                    fontWeight: "bold",
-                    cursor: "pointer",
-                  }}
-                >
-                  ⌚ この目的地でWatchナビ開始
-                </button>
-
-                <button
-                  type="button"
-                  disabled={watchBusy}
-                  onClick={() => void stopWatchNavigation()}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    marginTop: 8,
-                    padding: 10,
-                    borderRadius: 12,
-                  }}
-                >
-                  🛑 Watchナビ終了
-                </button>
 
                 {watchMessage && (
                   <p role="status">{watchMessage}</p>

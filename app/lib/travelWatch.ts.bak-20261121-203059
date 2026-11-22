@@ -1,0 +1,83 @@
+import { Capacitor, registerPlugin } from "@capacitor/core";
+import { prefectures } from "../data/prefectures";
+import type { VisitRecord } from "../types/travel";
+
+export const visitStorageKey = "miyamu-travel-visits";
+
+type VisitSummary = {
+  count: number;
+  latestName: string;
+  latestDate: string;
+};
+
+export const watch = registerPlugin<{
+  updateVisits(summary: VisitSummary): Promise<void>;
+  searchPlaces(options: { query: string }): Promise<{
+    places: {
+      name: string;
+      address: string;
+      latitude: number;
+      longitude: number;
+    }[];
+  }>;
+  getRoutes(options: {
+    latitude: number;
+    longitude: number;
+  }): Promise<{
+    routes: {
+      mode: "walking" | "driving" | "transit";
+      available: boolean;
+      distance?: number;
+      minutes?: number;
+      error?: string;
+    }[];
+  }>;
+  startNavigation(options: {
+    name: string;
+    latitude: number;
+    longitude: number;
+    mode?: "walking" | "transit" | "driving";
+  }): Promise<void>;
+  stopNavigation(): Promise<void>;
+  openWalkingMap(options: {
+    name: string;
+    latitude: number;
+    longitude: number;
+    mode: "walking" | "transit" | "driving";
+  }): Promise<void>;
+}>("TravelWatch");
+
+const prefectureIds = new Set<string>(prefectures.map(({ id }) => id));
+
+export function summarizeTravelVisits(records: unknown): VisitSummary | undefined {
+  if (!Array.isArray(records)) return;
+
+  const visited = new Set<string>();
+  let latest: Pick<VisitRecord, "name" | "visitedAt"> | undefined;
+  for (const visit of records) {
+    if (!visit || !prefectureIds.has(visit.prefectureId)) continue;
+    visited.add(visit.prefectureId);
+    if (typeof visit.name === "string" && typeof visit.visitedAt === "string" &&
+        (!latest || visit.visitedAt >= latest.visitedAt)) {
+      latest = visit;
+    }
+  }
+
+  return {
+    count: visited.size,
+    latestName: latest?.name ?? "",
+    latestDate: latest?.visitedAt ?? "",
+  };
+}
+
+export async function syncTravelWatchVisits(): Promise<void> {
+  if (Capacitor.getPlatform() !== "ios" || !Capacitor.isPluginAvailable("TravelWatch")) return;
+
+  try {
+    const saved = localStorage.getItem(visitStorageKey);
+    const summary = summarizeTravelVisits(saved === null ? [] : JSON.parse(saved));
+    if (summary) await watch.updateVisits(summary);
+  } catch (error) {
+    console.warn("Watchへの訪問記録の同期に失敗しました", error);
+  }
+}

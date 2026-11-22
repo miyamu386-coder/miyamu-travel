@@ -1,0 +1,77 @@
+.scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 12px auto 20px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #f0f8f5;
+  overflow: hidden;
+}
+
+.mofu {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  background-image: url("/mofu/tokotoko-sprites.png");
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  background-position: 0% 0%;
+  animation:
+    travel 5s linear infinite,
+    footsteps 0.5s steps(1, end) infinite;
+}
+
+.caption {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #47665c;
+}
+
+@keyframes travel {
+  from {
+    transform: translateX(-150px) scaleX(-1);
+  }
+  to {
+    transform: translateX(150px) scaleX(-1);
+  }
+}
+
+@keyframes footsteps {
+  0%, 49.99% {
+    background-position: 0% 0%;
+  }
+  50%, 100% {
+    background-position: 100% 0%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mofu {
+    animation: none;
+    background-position: 100% 100%;
+  }
+}
+
+
+/* 車モフ */
+.mofu[data-mode="driving"] {
+  width: 180px;
+  height: 126px;
+  background-image: url("/mofu/mofu-car.gif");
+  background-size: contain;
+  background-position: center;
+  animation: none;
+}
+
+/* 電車モフ */
+.mofu[data-mode="transit"] {
+  width: 180px;
+  height: 126px;
+  background-image: url("/mofu/mofu-train.gif");
+  background-size: contain;
+  background-position: center;
+  animation: none;
+}

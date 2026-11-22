@@ -1,0 +1,108 @@
+.viewport {
+    position: relative;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+    isolation: isolate;
+}
+
+.previous {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    perspective: 850px;
+}
+
+.sheetNext,
+.sheetPrevious {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    overflow: hidden;
+    backface-visibility: hidden;
+    background: #efe1c5;
+}
+
+.sheetNext {
+    left: 50%;
+    transform-origin: left center;
+    animation: next 360ms ease-in-out both;
+}
+
+.sheetPrevious {
+    right: 50%;
+    transform-origin: right center;
+    animation: previous 360ms ease-in-out both;
+}
+
+.oldSpread {
+    position: absolute;
+    top: 0;
+    width: 200%;
+}
+
+.sheetNext .oldSpread { right: 0; }
+.sheetPrevious .oldSpread { left: 0; }
+
+.sheetNext::after,
+.sheetPrevious::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #39230e55, transparent);
+    opacity: 0;
+    animation: shadow 360ms ease-in-out both;
+}
+
+.sheetPrevious::after {
+    background: linear-gradient(270deg, #39230e55, transparent);
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-block-start: 0.5rem;
+}
+
+.controls button {
+    min-height: 44px;
+    padding-inline: 0.75rem;
+}
+
+@keyframes next {
+    to { transform: rotateY(-155deg); }
+}
+
+@keyframes previous {
+    to { transform: rotateY(155deg); }
+}
+
+@keyframes shadow {
+    50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .previous { display: none; }
+}
+
+.stillLeft,
+.stillRight {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    overflow: hidden;
+    animation: reveal 360ms linear both;
+}
+
+.stillLeft { left: 0; }
+.stillRight { right: 0; }
+.stillLeft .oldSpread { left: 0; }
+.stillRight .oldSpread { right: 0; }
+
+@keyframes reveal {
+    0%, 43% { opacity: 1; }
+    66%, 100% { opacity: 0; }
+}

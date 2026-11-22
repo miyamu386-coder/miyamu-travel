@@ -71,6 +71,20 @@ public final class TravelWatchPlugin: CAPPlugin, CAPBridgedPlugin {
 
     private let routeLocation = TravelRouteLocation()
 
+    public override func load() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleTripEnded),
+            name: Notification.Name("TravelMofuTripEnded"),
+            object: nil
+        )
+    }
+
+    @objc private func handleTripEnded() {
+        notifyListeners("tripEnded", data: [:])
+    }
+
+
     @objc func getRoutes(_ call: CAPPluginCall) {
         guard let latitude = call.getDouble("latitude"),
               let longitude = call.getDouble("longitude"),
@@ -204,14 +218,34 @@ public final class TravelWatchPlugin: CAPPlugin, CAPBridgedPlugin {
             return
         }
 
+        let mode = call.getString("mode") ?? "walking"
+        guard ["walking", "driving", "transit"].contains(mode) else {
+            call.reject("移動方法が正しくありません")
+            return
+        }
+
         DispatchQueue.main.async {
-            TravelWalkingNavigation.shared.start(
-                name: name,
-                coordinate: CLLocationCoordinate2D(
-                    latitude: latitude,
-                    longitude: longitude
+            TravelWalkingNavigation.shared.stop()
+
+            if mode == "walking" {
+                TravelWalkingNavigation.shared.start(
+                    name: name,
+                    coordinate: CLLocationCoordinate2D(
+                        latitude: latitude,
+                        longitude: longitude
+                    )
                 )
-            )
+            } else {
+                let instruction = mode == "driving"
+                    ? "車モフと移動中"
+                    : "電車モフと移動中"
+
+                TravelWatchSender.shared.updateNavigation([
+                    "destination": name,
+                    "instruction": instruction,
+                    "mode": mode
+                ])
+            }
         }
         call.resolve()
     }

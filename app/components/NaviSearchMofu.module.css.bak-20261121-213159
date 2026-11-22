@@ -1,0 +1,63 @@
+.scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px auto 20px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #f0f8f5;
+}
+
+.mofu {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+
+/* 既存の全身画像から下半身だけを表示 */
+.body {
+  position: absolute;
+  inset: 0;
+  background-image: url("/mofu/tokotoko-sprites.png");
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  background-position: 100% 100%;
+  clip-path: inset(56% 0 0 0);
+}
+
+/* 3つ並んだ頭画像の中央だけを表示 */
+.head {
+  position: absolute;
+  z-index: 1;
+  top: 2%;
+  left: 8%;
+  width: 84%;
+  height: 66%;
+  background-image: url("/mofu/search/mofu-heads.png");
+  background-repeat: no-repeat;
+  background-size: 300% 100%;
+  background-position: 50% 50%;
+  transform-origin: 50% 85%;
+}
+
+/* 体は動かさず頭だけ左右に傾ける */
+@keyframes mofuHeadTilt {
+  0%, 15%, 45%, 55%, 85%, 100% {
+    transform: rotate(0deg);
+  }
+
+  30% {
+    transform: rotate(-15deg);
+  }
+
+  70% {
+    transform: rotate(15deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .head {
+    animation: mofuHeadTilt 5s ease-in-out infinite;
+  }
+}

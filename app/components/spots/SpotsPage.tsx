@@ -1,5 +1,6 @@
 "use client";
 
+import { syncTravelWatchVisits } from "../../lib/travelWatch";
 import { useEffect, useState } from "react";
 import TouristSpotList from "./TouristSpotList";
 import type {
@@ -171,6 +172,7 @@ export default function SpotsPage() {
                 }
                 const nextVisits: VisitRecord[] = [...existing, visit];
                 localStorage.setItem(key, JSON.stringify(nextVisits));
+                void syncTravelWatchVisits();
                 setVisits(nextVisits);
                 return true;
               } catch (error) {

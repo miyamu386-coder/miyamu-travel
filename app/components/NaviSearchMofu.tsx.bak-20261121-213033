@@ -1,0 +1,15 @@
+"use client";
+
+import styles from "./NaviSearchMofu.module.css";
+
+export default function NaviSearchMofu() {
+  return (
+    <div className={styles.scene}>
+      <div
+        className={styles.mofu}
+        role="img"
+        aria-label="探検家モフ"
+      />
+    </div>
+  );
+}

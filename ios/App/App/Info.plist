@@ -72,5 +72,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>ナビモフの徒歩案内で現在地を使います。</string>
 </dict>
 </plist>

@@ -5,6 +5,7 @@ import JapanOverviewArtwork from "./JapanOverviewArtwork";
 type Props = {
   visitedIds: ReadonlySet<PrefectureId>;
   hokkaidoComplete: boolean;
+  onOpenNavi: () => void;
   onSelectRegion: (
     region:
       | "hokkaido"
@@ -20,12 +21,22 @@ type Props = {
 
 export default function JapanOverviewSvg({
   onSelectRegion,
+  onOpenNavi,
   visitedIds,
   hokkaidoComplete,
 }: Props) {
   return (
     <div className="japan-overview">
-      <div className={styles.mofu} aria-hidden="true" />
+      <div className={styles.mofuBubble}>
+        今日はどこにいこう？
+      </div>
+
+      <button
+        type="button"
+        className={styles.mofu}
+        aria-label="モフとお出かけ先を探す"
+        onClick={onOpenNavi}
+      />
       <JapanOverviewArtwork visitedIds={visitedIds} hokkaidoComplete={hokkaidoComplete} />
 
       <button

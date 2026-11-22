@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AlbumPicker from "./AlbumPicker";
+import { firstAlbum, loadAlbums, saveAlbums, type Album } from "../../lib/landscapeAlbums";
+import LandscapeAlbumBook from "./LandscapeAlbumBook";
 import { playTokotokoMofu } from "../TokotokoMofu";
 import {
   Camera,
@@ -17,6 +20,10 @@ import {
 } from "../../lib/photoStorage";
 
 export default function PhotoAlbum() {
+  const [albums, setAlbums] = useState<Album[]>([firstAlbum]);
+  const [atShelf, setAtShelf] = useState(true);
+  const [activeId, setActiveId] = useState(firstAlbum.id);
+  const activeAlbum = albums.find(album => album.id === activeId) ?? firstAlbum;
   const [photos, setPhotos] = useState<TravelPhoto[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [loaded, setLoaded] = useState(false);
@@ -33,10 +40,11 @@ export default function PhotoAlbum() {
 
     async function load() {
       try {
-        const records = await loadTravelPhotos();
+        const [records, catalog] = await Promise.all([loadTravelPhotos(), loadAlbums()]);
 
         if (!active) return;
 
+        setAlbums(catalog);
         setPhotos(records);
 
         const resolved: Record<string, string> = {};
@@ -51,14 +59,16 @@ export default function PhotoAlbum() {
           }
         }
 
-        if (active) setUrls(resolved);
+        if (active) {
+          setUrls(resolved);
+          setLoaded(true);
+        }
       } catch (error) {
         console.error(error);
         if (active) {
           setError("写真記録を読み込めませんでした。");
         }
-      } finally {
-        if (active) setLoaded(true);
+
       }
     }
 
@@ -68,6 +78,26 @@ export default function PhotoAlbum() {
       active = false;
     };
   }, []);
+
+  async function saveAlbum(album: Album) {
+    if (!loaded || busy) return false;
+    setBusy(true);
+    setError("");
+    try {
+      const next = albums.some(item => item.id === album.id)
+        ? albums.map(item => item.id === album.id ? album : item) : [...albums, album];
+      await saveAlbums(next);
+      setAlbums(next);
+      setActiveId(album.id);
+      setAtShelf(false);
+      return true;
+    } catch {
+      setError("アルバム名を保存できませんでした。もう一度お試しください。");
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function choosePhoto(source: CameraSource) {
     try {
@@ -103,6 +133,7 @@ export default function PhotoAlbum() {
       const record: TravelPhoto = {
         id: crypto.randomUUID(),
         title: title.trim(),
+        albumId: activeId,
         prefectureId: "",
         takenAt,
         memo: memo.trim(),
@@ -180,12 +211,26 @@ export default function PhotoAlbum() {
     }
   }
 
+  const firstPhotos: Record<string, string> = {};
+  for (const photo of photos) {
+    const album = photo.albumId ?? firstAlbum.id;
+    if (!firstPhotos[album] && urls[photo.id]) firstPhotos[album] = urls[photo.id];
+  }
+
   return (
     <section style={{ padding: 20, paddingBottom: 110 }}>
-      <h2>🖼️ 旅の写真</h2>
-      <p>旅の思い出をアルバムに残そう！</p>
-
       {error && <p role="alert">{error}</p>}
+      <AlbumPicker albums={albums} active={activeAlbum} atShelf={atShelf}
+        firstPhotos={firstPhotos} back={() => setAtShelf(true)}
+        select={id => { setActiveId(id); setAtShelf(false); }}
+        disabled={!loaded || busy || Boolean(imageData)} save={saveAlbum} />
+      {!atShelf && <>
+      <LandscapeAlbumBook key={activeId} albumTitle={activeAlbum.title}
+        photos={photos.filter(photo => (photo.albumId ?? firstAlbum.id) === activeId)}
+        urls={urls}
+        loaded={loaded}
+        busy={busy}
+        onRemove={removePhoto} />
 
       <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
         <button
@@ -255,63 +300,7 @@ export default function PhotoAlbum() {
         </div>
       )}
 
-      <h3 style={{ marginTop: 32 }}>
-        保存した写真（{photos.length}件）
-      </h3>
-
-      {!loaded ? (
-        <p>読み込み中...</p>
-      ) : photos.length === 0 ? (
-        <p>まだ写真がありません。</p>
-      ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: 12,
-            marginTop: 16,
-          }}
-        >
-          {photos.map((photo) => (
-            <article
-              key={photo.id}
-              style={{
-                padding: 12,
-                background: "#fff",
-                border: "1px solid #ddd",
-                borderRadius: 16,
-              }}
-            >
-              {urls[photo.id] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={urls[photo.id]}
-                  alt={photo.title}
-                  style={{
-                    width: "100%",
-                    aspectRatio: "1",
-                    objectFit: "cover",
-                  }}
-                />
-              ) : (
-                <p>画像を表示できません</p>
-              )}
-
-              <h4>{photo.title}</h4>
-              {photo.takenAt && <p>{photo.takenAt}</p>}
-              {photo.memo && <p>{photo.memo}</p>}
-
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => void removePhoto(photo)}
-              >
-                削除
-              </button>
-            </article>
-          ))}
-        </div>
-      )}
+      </>}
     </section>
   );
 }

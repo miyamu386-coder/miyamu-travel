@@ -25,5 +25,40 @@
   width: 28%;
   aspect-ratio: 1;
   background: url("/mofu/tokotoko-sprites.png") 100% 100% / 200% 200% no-repeat;
+  pointer-events: auto;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  z-index: 5;
+}
+
+
+.mofuBubble {
+  position: absolute;
+  top: 3%;
+  left: 28%;
+  z-index: 6;
+  padding: 9px 13px;
+  background: #ffffff;
+  border: 2px solid #405c50;
+  border-radius: 18px;
+  color: #243b32;
+  font-size: clamp(11px, 3vw, 15px);
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px #00000018;
   pointer-events: none;
+}
+
+.mofuBubble::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  left: 18px;
+  width: 13px;
+  height: 13px;
+  background: #ffffff;
+  border-right: 2px solid #405c50;
+  border-bottom: 2px solid #405c50;
+  transform: rotate(45deg);
 }

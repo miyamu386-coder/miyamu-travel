@@ -1,5 +1,6 @@
 "use client";
 
+import { syncTravelWatchVisits } from "../lib/travelWatch";
 import { useEffect, useState } from "react";
 import { touristSpots } from "../data/touristSpots";
 import { nationalTouristSpots } from "../data/nationalTouristSpots";
@@ -72,7 +73,7 @@ function hasVisitedEveryHokkaidoSpot(visits: VisitRecord[]) {
     Array.from(hokkaidoSpotNames).every((name) => visitedNames.has(name));
 }
 
-export default function JapanMap() {
+export default function JapanMap({ onOpenNavi }: { onOpenNavi: () => void }) {
   const [selectedRegion, setSelectedRegion] =
     useState<RegionId | null>(null);
 
@@ -114,6 +115,7 @@ useEffect(() => {
     "miyamu-travel-visits",
     JSON.stringify(visits)
   );
+  void syncTravelWatchVisits();
 }, [visits, hasLoadedVisits]);
 
   const [isVisitFormOpen, setIsVisitFormOpen] =
@@ -248,6 +250,7 @@ useEffect(() => {
   return (
     <section className="japan-map">
       <JapanOverviewSvg
+        onOpenNavi={onOpenNavi}
         hokkaidoComplete={hasVisitedEveryHokkaidoSpot(visits)}
         visitedIds={visitedIds}
         onSelectRegion={(regionId) => {

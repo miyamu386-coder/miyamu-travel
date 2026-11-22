@@ -1,0 +1,32 @@
+.scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px auto 20px;
+  padding: 12px;
+  border-radius: 16px;
+  background: #f0f8f5;
+}
+
+.mofu {
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+  background-image: url("/mofu/tokotoko-sprites.png");
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  background-position: 100% 100%;
+}
+
+
+@keyframes searchMofuIdle {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mofu {
+    animation: searchMofuIdle 4s ease-in-out infinite;
+  }
+}

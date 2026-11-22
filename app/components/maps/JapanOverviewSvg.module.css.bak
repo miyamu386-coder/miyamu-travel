@@ -1,0 +1,33 @@
+.home {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+}
+
+.home::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse at 50% -5px, transparent 15px, #ffffff65 16px, #ffffff65 17px, transparent 18px),
+    radial-gradient(ellipse at 18% 15%, #f3fcf7 0%, transparent 52%),
+    linear-gradient(145deg, #e3f5ef, #d0e9ee 60%, #bcdce7);
+  background-size: 62px 30px, 100% 100%, 100% 100%;
+  background-repeat: repeat, no-repeat, no-repeat;
+}
+
+.mofu {
+  position: absolute;
+  top: 9%;
+  left: 8%;
+  width: 28%;
+  aspect-ratio: 1;
+  background: url("/mofu/tokotoko-sprites.png") 100% 100% / 200% 200% no-repeat;
+  pointer-events: auto;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  z-index: 5;
+}

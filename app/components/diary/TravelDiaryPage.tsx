@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import TravelDiaryBook from "./TravelDiaryBook";
+import bookStyles from "./TravelDiaryBook.module.css";
 import {
   loadTravelDiary,
   saveTravelDiary,
@@ -209,8 +211,7 @@ export default function TravelDiaryPage() {
 
   return (
     <section style={{ padding: 20, paddingBottom: 110 }}>
-      <h2>📖 旅日記</h2>
-      <p>モフ太郎と旅の思い出を記録しよう！</p>
+      <h2>旅日記</h2>
 
       {error && <p role="alert">{error}</p>}
 
@@ -225,6 +226,7 @@ export default function TravelDiaryPage() {
         </button>
       ) : (
         <div
+          className={bookStyles.form}
           style={{
             display: "grid",
             gap: 14,
@@ -301,59 +303,16 @@ export default function TravelDiaryPage() {
         </div>
       )}
 
-      <h3 style={{ marginTop: 32 }}>
-        旅日記一覧（{entries.length}件）
-      </h3>
-
-      {!loaded ? (
-        <p>読み込み中...</p>
-      ) : sortedEntries.length === 0 ? (
-        <p>まだ旅日記がありません。</p>
-      ) : (
-        <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
-          {sortedEntries.map((entry) => (
-            <article
-              key={entry.id}
-              style={{
-                padding: 18,
-                background: "#fff",
-                border: "1px solid #ddd",
-                borderRadius: 16,
-              }}
-            >
-              <h4>{entry.title}</h4>
-              <p>{entry.visitedAt}</p>
-              <p>
-                📍{" "}
-                {prefectures.find(
-                  (item) => item.id === entry.prefectureId
-                )?.name ?? entry.prefectureId}
-              </p>
-              <p style={{ whiteSpace: "pre-wrap" }}>
-                {entry.body}
-              </p>
-
-              <div style={{ display: "flex", gap: 12 }}>
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => startEdit(entry)}
-                >
-                  編集
-                </button>
-
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={() => void handleDelete(entry)}
-                >
-                  削除
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
+      <div hidden={formOpen}>
+        <TravelDiaryBook
+          entries={sortedEntries}
+          loaded={loaded}
+          busy={busy}
+          placeName={(entry) => prefectures.find((item) => item.id === entry.prefectureId)?.name ?? entry.prefectureId}
+          onEdit={startEdit}
+          onDelete={handleDelete}
+        />
+      </div>
     </section>
   );
 }

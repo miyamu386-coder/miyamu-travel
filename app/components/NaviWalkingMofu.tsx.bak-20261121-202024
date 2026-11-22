@@ -1,0 +1,15 @@
+"use client";
+
+import styles from "./NaviWalkingMofu.module.css";
+
+export default function NaviWalkingMofu() {
+  return (
+    <div className={styles.scene}>
+      <div
+        className={styles.mofu}
+        role="img"
+        aria-label="トコトコ歩くモフ"
+      />
+    </div>
+  );
+}

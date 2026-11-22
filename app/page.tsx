@@ -23,8 +23,14 @@ import type {
   GoshuinRecord,
 } from "./types/travel";
 
+import { syncTravelWatchVisits } from "./lib/travelWatch";
+
 export default function Home() {
   const [tab, setTab] = useState("home");
+
+  useEffect(() => {
+    void syncTravelWatchVisits();
+  }, []);
   const writeInProgress = useRef(false);
   const [goshuinLoaded, setGoshuinLoaded] = useState(false);
   const [deletingGoshuin, setDeletingGoshuin] = useState(false);

@@ -18,10 +18,10 @@
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		A698D4BD30B0C4CA00AB3DDB /* TravelMofuMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A698D4BB30B0C4CA00AB3DDB /* TravelMofuMapViewController.swift */; };
 		A698D4BF30B0C74C00AB3DDB /* tokotoko-sprites.png in Resources */ = {isa = PBXBuildFile; fileRef = A698D4BE30B0C74C00AB3DDB /* tokotoko-sprites.png */; };
-		B10000000000000000000001 /* mofu-car.gif in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* mofu-car.gif */; };
-		B10000000000000000000003 /* mofu-train.gif in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* mofu-train.gif */; };
 		A698D4C130B0C91100AB3DDB /* mofu-travel-walk.png in Resources */ = {isa = PBXBuildFile; fileRef = A698D4C030B0C91100AB3DDB /* mofu-travel-walk.png */; };
 		A6B6B1D130AFDE7E00F59CF7 /* Travel Watch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = A6B6B1C730AFDE7D00F59CF7 /* Travel Watch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B10000000000000000000001 /* mofu-car.gif in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* mofu-car.gif */; };
+		B10000000000000000000003 /* mofu-train.gif in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* mofu-train.gif */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,10 +62,10 @@
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		A698D4BB30B0C4CA00AB3DDB /* TravelMofuMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TravelMofuMapViewController.swift; sourceTree = "<group>"; };
 		A698D4BE30B0C74C00AB3DDB /* tokotoko-sprites.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tokotoko-sprites.png"; sourceTree = "<group>"; };
-		B10000000000000000000002 /* mofu-car.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "mofu-car.gif"; sourceTree = "<group>"; };
-		B10000000000000000000004 /* mofu-train.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "mofu-train.gif"; sourceTree = "<group>"; };
 		A698D4C030B0C91100AB3DDB /* mofu-travel-walk.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mofu-travel-walk.png"; sourceTree = "<group>"; };
 		A6B6B1C730AFDE7D00F59CF7 /* Travel Watch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Travel Watch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000002 /* mofu-car.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "mofu-car.gif"; sourceTree = "<group>"; };
+		B10000000000000000000004 /* mofu-train.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "mofu-train.gif"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
